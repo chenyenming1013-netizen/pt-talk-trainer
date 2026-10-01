@@ -363,7 +363,7 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
   <section class="view" id="view-record">
     <div class="panel" style="margin-bottom:18px" id="relayPanel" hidden>
       <h2>AI 連線</h2>
-      <p class="lead">這個網站透過診所的中繼服務連到 Google Gemini，不需要輸入金鑰。</p>
+      <p class="lead">這個網站透過診所的中繼服務連到 AI，不需要輸入金鑰。</p>
       <div class="form">
         <div><button class="btn primary" id="relayTest">測試連線</button> <button class="btn" id="codeClear" hidden>清除這台裝置的通行碼</button> <span class="muted" id="relayMsg"></span><div class="muted" id="relayDetail" style="font-size:12.5px;margin-top:6px;word-break:break-all"></div></div>
       </div>
@@ -603,6 +603,7 @@ async function aiJSONOnce(prompt, opts={}){
       if(msg==="access_code"){ showCodeBox(ACCESS?"通行碼不正確，請重新輸入。":""); throw {code:"need_code"}; }
       if(msg==="origin_not_allowed") throw {code:"origin",message:location.origin};
       if(msg==="relay_missing_key") throw {code:"relay_key"};
+      if(msg==="all_free_quota_used") throw {code:"all_used"};
     }
     if(res.status===402 || /prepayment credits are depleted/i.test(msg)) throw {code:"no_credit",message:msg};
     if(res.status===503 || res.status===500 || /high demand|overloaded|UNAVAILABLE/i.test(msg)) throw {code:"busy",message:msg};
@@ -613,6 +614,7 @@ async function aiJSONOnce(prompt, opts={}){
     if(res.status===400 && /location|region|not supported/i.test(msg)) throw {code:"region",message:msg};
     throw {code:"server",message:msg||("HTTP "+res.status)};
   }
+  if(data&&data.provider) LAST_PROVIDER=data.provider;
   const cand=data&&data.candidates&&data.candidates[0];
   if(!cand) throw {code:"blocked"};
   const text=(cand.content&&cand.content.parts||[]).filter(p=>!p.thought).map(p=>p.text||"").join("");
@@ -628,7 +630,17 @@ async function aiJSONOnce(prompt, opts={}){
 const FALLBACK=["gemini-flash-latest","gemini-3-flash-preview","gemini-2.5-flash","gemini-flash-lite-latest","gemini-3.1-flash-lite-preview","gemini-2.5-flash-lite"];
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const canSwitch=e=>e&&(e.code==="model"||e.code==="busy"||e.code==="network"||(e.code==="rate_limited"&&/limit:\s*0|free_tier/i.test(e.message||"")));
+let LAST_PROVIDER="";
+const providerName=p=>!p?"":p.startsWith("gemini")?"Google Gemini（"+p.split(":")[1]+"）":p.startsWith("workers-ai")?"Cloudflare Workers AI（Qwen）":p.startsWith("groq")?"Groq（"+p.split(":")[1]+"）":p;
 async function aiJSON(prompt, opts={}){
+  if(RELAY){   // 中繼服務會自己在各家免費 AI 之間接力，網頁只需在忙碌時重試一次
+    try{ return await aiJSONOnce(prompt, opts); }
+    catch(e){
+      if(!(e&&(e.code==="busy"||e.code==="network"))) throw e;
+      await sleep(1500);
+      return await aiJSONOnce(prompt, opts);
+    }
+  }
   let first;
   try{ return await aiJSONOnce(prompt, opts); }
   catch(e){
@@ -653,15 +665,16 @@ refreshNotice();
 
 const $ = s=>document.querySelector(s);
 const esc = s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const errFull = e=>errCopy(e&&e.code)+((e&&e.message&&["model","server","bad_key","region","busy"].includes(e.code))?`\n（Google：${e.message}）`:"");
+const errFull = e=>errCopy(e&&e.code)+((e&&e.message&&["model","server","bad_key","region","busy"].includes(e.code))?`\n（AI 服務訊息：${e.message}）`:"");
 const errCopy = code=>({
+  all_used:"今天所有免費 AI 的額度都用完了。Cloudflare 的額度在台灣時間早上 8 點重置，Google 的大約在下午 3 到 4 點重置，之後就能繼續練習。",
   need_code:"需要輸入診所通行碼，請在頁面上方輸入。",
   origin:"中繼服務不接受這個網址的連線，請診所負責人到 Cloudflare 檢查 ALLOWED_ORIGIN 設定。",
   relay_key:"中繼服務還沒有設定 Gemini 金鑰，請診所負責人到 Cloudflare 新增 GEMINI_KEY。",
   no_key:"還沒有設定 Gemini API 金鑰，請到「紀錄與設定」貼上金鑰。",
   bad_key:"金鑰無效或沒有權限，請到「紀錄與設定」確認金鑰是否複製完整。",
-  no_credit:"診所的 Gemini 預付餘額已用完，AI 功能暫停。請通知診所負責人到 Google AI Studio 儲值。",
-  busy:"Google 的 AI 伺服器目前太忙，已自動換其他模型重試仍不成功，請過一兩分鐘再送出。",
+  no_credit:"診所的 AI 預付餘額已用完，AI 功能暫停。請通知診所負責人儲值。",
+  busy:"AI 伺服器目前太忙，已自動換其他模型重試仍不成功，請過一兩分鐘再送出。",
   rate_limited:"免費額度的次數暫時用完了，等一分鐘再試；若整天都出現，代表今日額度已滿，明天會重置。",
   model:"找不到這個模型，可能已被 Google 停用，請到「紀錄與設定」換一個模型。",
   region:"Google 目前不支援從你的所在地區使用這個方案。",
@@ -1180,7 +1193,7 @@ $("#saveKey").addEventListener("click", async()=>{
   }catch(e){
     saveAI(); refreshNotice();
     $("#keyMsg").textContent=errCopy(e&&e.code);
-    if(e&&e.message) $("#keyDetail").textContent="Google 的原始訊息："+e.message;
+    if(e&&e.message) $("#keyDetail").textContent="AI 服務的原始訊息："+e.message;
   }finally{ $("#saveKey").disabled=false; }
 });
 $("#clearKey").addEventListener("click",()=>{ AI.key=""; saveAI(); renderAI(); refreshNotice(); $("#keyMsg").textContent="已清除金鑰。"; });
@@ -1211,10 +1224,11 @@ $("#relayTest").addEventListener("click", async()=>{
   if(!d.hasKey){ $("#relayMsg").textContent=errCopy("relay_key"); $("#relayTest").disabled=false; return; }
   try{
     const r=await aiJSON(TEST_PROMPT,{temperature:0.5,maxTokens:1024});
-    $("#relayMsg").textContent=`連線成功，使用模型 ${AI.model}：${r.say||"OK"}`;
+    $("#relayMsg").textContent=`連線成功，這次由 ${providerName(LAST_PROVIDER)||"AI"} 回覆：${r.say||"OK"}`;
+    if(d.providers) $("#relayDetail").textContent="已啟用的免費 AI（依序接力）："+d.providers.map(x=>({gemini:"Google Gemini","workers-ai":"Cloudflare Workers AI",groq:"Groq"}[x]||x)).join(" → ");
   }catch(e){
     $("#relayMsg").textContent=errCopy(e&&e.code);
-    if(e&&e.message) $("#relayDetail").textContent="Google 的原始訊息："+e.message;
+    if(e&&e.message) $("#relayDetail").textContent="AI 服務的原始訊息："+e.message;
   }finally{ $("#relayTest").disabled=false; }
 });
 $("#goSet").addEventListener("click",()=>document.querySelector('nav.tabs button[data-view="record"]').click());
