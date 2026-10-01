@@ -69,6 +69,24 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
 .case .dx{font-size:14.5px}
 .case .goal{font-size:13px;color:var(--sage);font-weight:500}
 .diff{white-space:nowrap;flex:none;font-size:12px;padding:1px 8px;border-radius:99px;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2);margin-left:auto}
+.case.add{border-style:dashed;align-items:center;justify-content:center;text-align:center;color:var(--sage);min-height:150px;font-weight:700}
+.case.add small{font-weight:400;color:var(--ink-2);font-size:13px}
+.case .own{font-size:11.5px;padding:1px 8px;border-radius:99px;background:var(--amber-soft);color:var(--amber);margin-left:6px;white-space:nowrap}
+.case-wrap{position:relative}
+.case-wrap .case{width:100%;height:100%}
+.del{position:absolute;right:8px;bottom:8px;border:0;background:transparent;color:var(--ink-2);font-size:12.5px;padding:4px 8px;border-radius:8px}
+.del:hover{color:var(--rose);background:var(--rose-soft)}
+.builder{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 24px;max-width:900px;margin:0 auto}
+.builder h2{margin:0 0 4px;font-size:20px}
+.builder textarea,.builder input,.builder select{font:inherit;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%}
+.builder textarea{min-height:110px;resize:vertical}
+.builder .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.builder label{display:grid;gap:4px;font-size:14px;color:var(--ink-2)}
+.builder .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.examples{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 0}
+.examples button{border:1px dashed var(--line);background:transparent;border-radius:99px;padding:3px 10px;font-size:12.5px;color:var(--ink-2)}
+.preview{margin-top:20px;border-top:1px dashed var(--line);padding-top:18px;display:grid;gap:12px}
+@media (max-width:860px){.builder .grid2{grid-template-columns:1fr}}
 .section-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 12px}
 .section-h h2{margin:0;font-size:19px}
 .section-h span{color:var(--ink-2);font-size:13.5px}
@@ -252,6 +270,42 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
       </div>
       <div class="section-h"><h2>選一位病人開始</h2><span>每位病人都有沒說出口的顧慮，要靠你問出來</span></div>
       <div class="cases" id="cases"></div>
+    </div>
+
+    <div id="builderScreen" hidden>
+      <div class="builder">
+        <h2>新增病人案例</h2>
+        <p class="muted" style="margin:0 0 14px;font-size:14.5px">用幾句話描述病人背景，AI 會補齊個性、生活目標、沒說出口的顧慮和開場白。產生後每一欄都可以再修改。</p>
+        <label>病人背景
+          <textarea id="bInput" placeholder="例如：50 歲男性計程車司機，右肩五十肩 4 個月，晚上會痛醒，覺得年紀到了就會這樣，很在意要停工賺不到錢。"></textarea>
+        </label>
+        <div class="examples" id="bExamples"></div>
+        <div class="grid2" style="margin-top:12px">
+          <label>希望練習的重點
+            <select id="bFocus">
+              <option value="">讓 AI 依病情判斷最適合的方案</option>
+              <option value="體外震波">說明體外震波</option>
+              <option value="徒手治療">說明自費徒手治療</option>
+              <option value="一對一運動治療課程">說明一對一運動治療課程</option>
+              <option value="誠實判斷：這位病人不適合自費，練習好好照顧健保病人">不適合自費的病人（練誠信）</option>
+            </select>
+          </label>
+          <label>病人難度
+            <select id="bDiff">
+              <option value="溫和">溫和</option>
+              <option value="一般" selected>一般</option>
+              <option value="偏難">偏難</option>
+            </select>
+          </label>
+        </div>
+        <div class="row">
+          <button class="btn primary" id="bBuild">用 AI 建構人格</button>
+          <button class="btn" id="bRandom">隨機產生一位</button>
+          <button class="btn" id="bCancel">取消</button>
+          <span class="muted" id="bMsg"></span>
+        </div>
+        <div class="preview" id="bPreview" hidden></div>
+      </div>
     </div>
 
     <div id="sessionScreen" hidden>
@@ -626,35 +680,51 @@ document.querySelectorAll("nav.tabs button").forEach(b=>b.addEventListener("clic
 }));
 
 /* =================== PRACTICE =================== */
-function renderCases(){
-  $("#cases").innerHTML = CASES.map(c=>`
-    <button class="case" data-id="${c.id}">
-      <span class="who"><span class="avatar">${esc(c.init)}</span>
-        <span><span class="name">${esc(c.name)}</span><br><span class="meta">${c.age} 歲，${esc(c.job.split("，")[0])}</span></span>
+let CUSTOM=[];
+try{ const c=JSON.parse(localStorage.getItem("ptt-cases")||"null"); if(Array.isArray(c)) CUSTOM=c; }catch(e){}
+function saveCustom(){ try{localStorage.setItem("ptt-cases",JSON.stringify(CUSTOM));}catch(e){} }
+const allCases=()=>[...CASES,...CUSTOM];
+function caseCard(c,own){
+  return `<div class="case-wrap"><button class="case" data-id="${esc(c.id)}">
+      <span class="who"><span class="avatar">${esc(c.init||String(c.name||"?").slice(0,1))}</span>
+        <span><span class="name">${esc(c.name)}</span>${own?'<span class="own">自訂</span>':''}<br><span class="meta">${esc(c.age)} 歲，${esc(String(c.job||"").split("，")[0])}</span></span>
         <span class="diff">${esc(c.diff)}</span></span>
       <span class="dx">${esc(c.dx)}，${esc(c.dur)}</span>
       <span class="meta">主訴：${esc(c.chief)}</span>
-    </button>`).join("");
-  document.querySelectorAll(".case").forEach(el=>el.addEventListener("click",()=>startSession(el.dataset.id)));
+    </button>${own?`<button class="del" data-del="${esc(c.id)}" aria-label="刪除${esc(c.name)}">刪除</button>`:''}</div>`;
+}
+function renderCases(){
+  $("#cases").innerHTML = CASES.map(c=>caseCard(c,false)).join("") + CUSTOM.map(c=>caseCard(c,true)).join("") +
+    `<button class="case add" id="addCase">＋ 新增病人案例<small>描述背景，讓 AI 建構人格</small></button>`;
+  document.querySelectorAll(".case[data-id]").forEach(el=>el.addEventListener("click",()=>startSession(el.dataset.id)));
+  document.querySelectorAll("[data-del]").forEach(el=>el.addEventListener("click",e=>{
+    e.stopPropagation();
+    const c=CUSTOM.find(x=>x.id===el.dataset.del);
+    if(c && confirm(`確定刪除「${c.name}」這個案例？`)){ CUSTOM=CUSTOM.filter(x=>x.id!==c.id); saveCustom(); renderCases(); }
+  }));
+  $("#addCase").addEventListener("click",openBuilder);
 }
 renderCases();
 
 let S = null; // session
 function startSession(id){
-  const c = CASES.find(x=>x.id===id);
+  const c = allCases().find(x=>x.id===id);
+  if(!c) return;
   S = {c, turns:[], trust:35, mood:"有點防備", found:[], decision:null, busy:false, ctl:null};
   $("#pickScreen").hidden = true; $("#reportScreen").hidden = true; $("#sessionScreen").hidden = false;
   $("#chatTitle").textContent = `與${c.name}的對話`;
   renderSide();
   const opener = openerFor(c);
   $("#log").innerHTML = "";
-  addMsg("sys", `情境：${c.name}今天${["ct","lb","jk"].includes(c.id)?"第一次來診所":"是第四次回診"}，你剛評估完。對話由病人先開口。`);
+  const visit = c.visit || (["ct","lb","jk"].includes(c.id)?"第一次來診所":"是第四次回診");
+  addMsg("sys", `情境：${c.name}今天${visit}，你剛評估完。對話由病人先開口。`);
   addMsg("pt", opener);
   S.turns.push({role:"patient", text:opener});
   renderQuick();
   $("#input").value=""; $("#input").focus();
 }
 function openerFor(c){
+  if(c.opener) return c.opener;
   return ({
     pf:"（坐下來揉著腳跟）老師，我這個腳還是一樣欸，早上起來還是痛得要命。是不是就這樣了，好不了了？",
     ct:"你好。我是骨科那邊轉過來的，醫生說我肩膀有鈣化。老實說我最近晚上都睡不好。",
@@ -722,7 +792,8 @@ ${c.name}，${c.age} 歲，${c.job}。
 已做過：${c.tried}。
 你內心真正的目標（除非治療師用心詢問生活影響或目標，否則不要主動完整說出）：${c.goal}
 你內心的顧慮（治療師問到或說明到相關內容時才逐步透露）：${c.concerns.join("；")}
-個性難度：${levelText()}
+${c.personality?`個性與說話風格：${c.personality}
+`:""}個性難度：${levelText()}
 ${priceText()}
 
 【扮演規則】
@@ -778,7 +849,7 @@ function setBusy(b){
 }
 $("#sendBtn").addEventListener("click",send);
 $("#input").addEventListener("keydown",e=>{ if(e.key==="Enter" && !e.shiftKey && !e.isComposing){ e.preventDefault(); send(); } });
-$("#quitBtn").addEventListener("click",()=>{ if(S&&S.ctl) S.ctl.abort(); S=null; $("#sessionScreen").hidden=true; $("#reportScreen").hidden=true; $("#pickScreen").hidden=false; });
+$("#quitBtn").addEventListener("click",()=>{ if(S&&S.ctl) S.ctl.abort(); S=null; $("#builderScreen").hidden=true; $("#sessionScreen").hidden=true; $("#reportScreen").hidden=true; $("#pickScreen").hidden=false; });
 
 $("#hintBtn").addEventListener("click", async()=>{
   if(!S||S.busy) return;
@@ -867,6 +938,102 @@ function renderReport(r){
   $("#againBtn").addEventListener("click",()=>startSession(S.c.id));
   $("#otherBtn").addEventListener("click",()=>{ $("#reportScreen").hidden=true; $("#pickScreen").hidden=false; });
 }
+
+/* =================== CASE BUILDER =================== */
+const B_EXAMPLES=[
+  "50 歲男性計程車司機，右肩五十肩 4 個月，晚上痛醒，擔心停工沒收入",
+  "30 歲女性護理師，媽媽手 3 個月，輪班很難請假，自己是醫療人員會質疑",
+  "62 歲男性退休公務員，腰椎狹窄走路腳麻，兒子陪同來，兒子很會上網查資料",
+  "26 歲女性瑜伽老師，阿基里斯腱炎半年，想快點回去上課，預算有限",
+  "45 歲男性科技業主管，網球肘，很忙只想要最快的方法，常改約"
+];
+let DRAFT=null;
+function openBuilder(){
+  $("#pickScreen").hidden=true; $("#sessionScreen").hidden=true; $("#reportScreen").hidden=true; $("#builderScreen").hidden=false;
+  $("#bMsg").textContent=""; $("#bPreview").hidden=true; DRAFT=null;
+  $("#bExamples").innerHTML=B_EXAMPLES.map(t=>`<button type="button">${esc(t)}</button>`).join("");
+  $("#bExamples").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{ $("#bInput").value=b.textContent; }));
+  window.scrollTo(0,0);
+  $("#bInput").focus();
+}
+$("#bCancel").addEventListener("click",()=>{ $("#builderScreen").hidden=true; $("#pickScreen").hidden=false; });
+
+function builderPrompt(desc, focus, diff){
+  return `你是台灣資深物理治療師與臨床教育者，要為「物理治療師溝通訓練軟體」設計一位虛構的模擬病人。病人資料要符合臨床常理，使用台灣口語繁體中文。
+
+${desc ? `治療師提供的背景：${desc}` : "請自行設計一位台灣物理治療門診常見、但與以下既有案例不重複的病人（既有：足底筋膜炎、鈣化性肌腱炎、網球肘、慢性下背痛、膝退化、跳躍膝）。"}
+希望練習的重點：${focus || "依病情判斷最適合的方案"}
+病人難度：${diff}
+${priceText()}
+
+規則：
+1. 名字用台灣常見姓氏加稱謂（如「黃先生」「吳阿姨」「蔡同學」），不要用真實名人。
+2. goal 要是具體、有畫面的生活目標；concerns 要 2 到 4 個沒說出口的顧慮，至少一個跟費用或時間有關。
+3. fit 要誠實寫出依實證最適合的方案。如果體外震波或其他自費項目並不是這個病情的主要適應症，要明確寫出「不建議」並說明理由，即使練習重點是推薦它。
+4. opener 是病人坐下後說的第一句話，30 到 60 字，可以用括號描述動作，帶出主訴但不要透露全部顧慮。
+5. 不要包含真實可辨識的個人資料。
+
+只回傳一個 JSON 物件，不要其他文字：
+{"name":"","age":整數,"job":"職業與工作型態","dx":"診斷","dur":"病程","tried":"已做過的治療","chief":"主訴","goal":"內心真正的目標","concerns":["",""],"fit":"最適合的方向與理由","hook":"能打動他的關鍵","personality":"一句話描述個性與說話風格","visit":"第一次來診所 或 是第幾次回診","opener":""}`;
+}
+const B_FIELDS=[
+  ["name","名字"],["age","年齡"],["job","職業"],["dx","診斷"],["dur","病程"],["tried","已做過的治療"],["chief","主訴"],
+  ["goal","內心真正的目標（不會主動說）"],["concerns","沒說出口的顧慮（一行一個）"],["fit","最適合的方案"],
+  ["hook","能打動他的關鍵"],["personality","個性與說話風格"],["visit","就診情境"],["opener","開場白"]
+];
+function renderDraft(){
+  const d=DRAFT;
+  const long=new Set(["tried","goal","concerns","fit","hook","personality","opener","chief"]);
+  $("#bPreview").innerHTML = `<h3 style="margin:0;font-size:17px">AI 建構的人格（可直接修改）</h3>` +
+    `<div class="grid2">` + B_FIELDS.map(([k,l])=>{
+      const v = k==="concerns" ? (d.concerns||[]).join("\n") : (d[k]??"");
+      const full = long.has(k);
+      return `<label style="${full?'grid-column:1/-1':''}">${l}${full?`<textarea data-k="${k}" style="min-height:${k==='concerns'?90:64}px">${esc(v)}</textarea>`:`<input data-k="${k}" value="${esc(v)}">`}</label>`;
+    }).join("") + `</div>
+    <div class="row" style="margin-top:4px">
+      <button class="btn primary" id="bStart">儲存並開始演練</button>
+      <button class="btn" id="bSave">只儲存</button>
+      <button class="btn" id="bRedo">重新產生</button>
+    </div>`;
+  $("#bPreview").hidden=false;
+  $("#bStart").addEventListener("click",()=>{ const c=commitDraft(); if(c){ $("#builderScreen").hidden=true; startSession(c.id); } });
+  $("#bSave").addEventListener("click",()=>{ if(commitDraft()){ $("#builderScreen").hidden=true; $("#pickScreen").hidden=false; } });
+  $("#bRedo").addEventListener("click",()=>buildCase(false));
+  $("#bPreview").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function commitDraft(){
+  const d={...DRAFT};
+  $("#bPreview").querySelectorAll("[data-k]").forEach(el=>{ d[el.dataset.k]=el.value.trim(); });
+  d.concerns=String(d.concerns||"").split(/\n+/).map(x=>x.trim()).filter(Boolean);
+  if(!d.name||!d.dx){ $("#bMsg").textContent="名字和診斷不能空白。"; return null; }
+  d.age=parseInt(d.age,10)||d.age;
+  d.init=String(d.name).slice(0,1);
+  d.diff=$("#bDiff").value;
+  if(d.personality) d.concerns=[...d.concerns]; // personality kept as its own field
+  d.id=DRAFT.id||("c"+Date.now().toString(36));
+  const i=CUSTOM.findIndex(x=>x.id===d.id);
+  if(i>=0) CUSTOM[i]=d; else CUSTOM.push(d);
+  saveCustom(); renderCases();
+  return d;
+}
+async function buildCase(random){
+  const desc = random ? "" : $("#bInput").value.trim();
+  if(!random && !desc){ $("#bInput").focus(); $("#bMsg").textContent="先寫幾句病人背景，或按「隨機產生一位」。"; return; }
+  if(!hasKey()){ $("#bMsg").textContent=errCopy("no_key"); return; }
+  ["#bBuild","#bRandom"].forEach(x=>$(x).disabled=true);
+  $("#bMsg").textContent="AI 正在建構人格，大約需要 10 到 30 秒……";
+  try{
+    const r=await aiJSON(builderPrompt(desc,$("#bFocus").value,$("#bDiff").value),{temperature:random?1.0:0.8,maxTokens:4096});
+    if(!r||!r.name) throw {code:"parse"};
+    DRAFT={...r, id: DRAFT&&!random ? DRAFT.id : undefined};
+    if(random && r.dx) $("#bInput").value=`${r.age} 歲${r.job}，${r.dx}，${r.dur}`;
+    $("#bMsg").textContent="完成，可以檢查後修改。";
+    renderDraft();
+  }catch(e){ $("#bMsg").textContent=errCopy(e&&e.code); }
+  finally{ ["#bBuild","#bRandom"].forEach(x=>$(x).disabled=false); }
+}
+$("#bBuild").addEventListener("click",()=>buildCase(false));
+$("#bRandom").addEventListener("click",()=>buildCase(true));
 
 /* =================== DRILL =================== */
 let DI = Math.floor(Math.random()*OBJECTIONS.length), streak=0, drillBusy=false;
