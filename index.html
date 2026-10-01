@@ -68,7 +68,7 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
 .case .meta{font-size:13px;color:var(--ink-2)}
 .case .dx{font-size:14.5px}
 .case .goal{font-size:13px;color:var(--sage);font-weight:500}
-.diff{font-size:12px;padding:1px 8px;border-radius:99px;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2);margin-left:auto}
+.diff{white-space:nowrap;flex:none;font-size:12px;padding:1px 8px;border-radius:99px;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2);margin-left:auto}
 .section-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 12px}
 .section-h h2{margin:0;font-size:19px}
 .section-h span{color:var(--ink-2);font-size:13.5px}
@@ -220,6 +220,15 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
 
   <div class="notice" id="aiNotice">還沒有設定 Gemini API 金鑰，所以 AI 病人和評分暫時無法使用。請向診所負責人取得金鑰，到「紀錄與設定」貼上就能開始。沒有金鑰時，仍可以使用話術庫，以及異議快練的「參考答案」。 <button class="btn" id="goSet" style="margin-left:6px">前往設定</button></div>
 
+  <div class="notice" id="codeBox">
+    <b>請輸入診所通行碼</b>（向診所負責人詢問，每台裝置只需輸入一次）
+    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+      <input id="codeInput" type="password" autocomplete="off" style="flex:1;min-width:160px;font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:7px 10px">
+      <button class="btn primary" id="codeSave">確認</button>
+    </div>
+    <div class="muted" id="codeMsg" style="font-size:13px;margin-top:6px"></div>
+  </div>
+
   <!-- ============ PRACTICE ============ -->
   <section class="view on" id="view-practice">
     <div id="pickScreen">
@@ -298,7 +307,14 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
 
   <!-- ============ RECORD ============ -->
   <section class="view" id="view-record">
-    <div class="panel" style="margin-bottom:18px">
+    <div class="panel" style="margin-bottom:18px" id="relayPanel" hidden>
+      <h2>AI 連線</h2>
+      <p class="lead">這個網站透過診所的中繼服務連到 Google Gemini，不需要輸入金鑰。</p>
+      <div class="form">
+        <div><button class="btn primary" id="relayTest">測試連線</button> <button class="btn" id="codeClear" hidden>清除這台裝置的通行碼</button> <span class="muted" id="relayMsg"></span><div class="muted" id="relayDetail" style="font-size:12.5px;margin-top:6px;word-break:break-all"></div></div>
+      </div>
+    </div>
+    <div class="panel" style="margin-bottom:18px" id="directPanel">
       <h2>Gemini API 連線</h2>
       <p class="lead">金鑰只存在這台裝置的瀏覽器裡，不會上傳到任何地方，只會直接送到 Google。金鑰由診所負責人統一申請後貼上即可，同仁不需要自己申請。大家共用同一份免費額度，出現「次數用完」時等一分鐘再試。</p>
       <div class="form">
@@ -478,26 +494,49 @@ function saveHist(){ try{localStorage.setItem("ptt-hist",JSON.stringify(HIST.sli
 load();
 
 /* ---------- Gemini client ---------- */
+// ↓↓↓ 貼上你的 Cloudflare Worker 網址（例如 https://pt-trainer.xxxx.workers.dev）。留空則改用「每台裝置輸入金鑰」模式。
+const RELAY_URL = "https://pt-trainer.chenyenming1013.workers.dev";
+const RELAY = RELAY_URL.trim().replace(/\/$/,"");
+let ACCESS = ""; try{ ACCESS = localStorage.getItem("ptt-code")||""; }catch(e){}
 let AI = {key:"", model:"gemini-flash-latest", mode:"auto"};
 try{ const a=JSON.parse(localStorage.getItem("ptt-ai")||"null"); if(a) AI={...AI,...a}; }catch(e){}
 function saveAI(){ try{localStorage.setItem("ptt-ai",JSON.stringify(AI));}catch(e){} }
-const hasKey = ()=>!!(AI.key && AI.key.trim());
+const hasKey = ()=> RELAY ? true : !!(AI.key && AI.key.trim());
 function refreshNotice(){ document.getElementById("aiNotice").classList.toggle("on", !hasKey()); }
+function showCodeBox(msg){ const b=document.getElementById("codeBox"); b.classList.add("on"); document.getElementById("codeMsg").textContent=msg||""; }
+async function relayPing(){
+  if(!RELAY) return null;
+  try{
+    const r=await fetch(RELAY+"/ping",{headers:{"X-Access-Code":ACCESS}});
+    const d=await r.json();
+    if(d.error&&d.error.message==="origin_not_allowed") return {originBad:true};
+    return d;
+  }catch(e){ return {down:true}; }
+}
 
 async function aiJSONOnce(prompt, opts={}){
   if(!hasKey()) throw {code:"no_key"};
-  const url=`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(AI.model)}:generateContent`;
+  const payload={
+    contents:[{role:"user",parts:[{text:prompt}]}],
+    generationConfig:{responseMimeType:"application/json",temperature:opts.temperature??0.8,maxOutputTokens:opts.maxTokens??4096}
+  };
   let res;
   try{
-    res = await fetch(url,{
-      method:"POST",
-      headers:{"Content-Type":"application/json","x-goog-api-key":AI.key.trim()},
-      signal:opts.signal,
-      body:JSON.stringify({
-        contents:[{role:"user",parts:[{text:prompt}]}],
-        generationConfig:{responseMimeType:"application/json",temperature:opts.temperature??0.8,maxOutputTokens:opts.maxTokens??4096}
-      })
-    });
+    if(RELAY){
+      res = await fetch(RELAY+"/generate",{
+        method:"POST",
+        headers:{"Content-Type":"application/json","X-Access-Code":ACCESS},
+        signal:opts.signal,
+        body:JSON.stringify({model:AI.model, ...payload})
+      });
+    }else{
+      res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(AI.model)}:generateContent`,{
+        method:"POST",
+        headers:{"Content-Type":"application/json","x-goog-api-key":AI.key.trim()},
+        signal:opts.signal,
+        body:JSON.stringify(payload)
+      });
+    }
   }catch(e){
     if(e && e.name==="AbortError") throw {code:"cancelled"};
     console.warn("[Gemini] fetch failed for model", AI.model, e);
@@ -506,6 +545,11 @@ async function aiJSONOnce(prompt, opts={}){
   let data=null; try{ data=await res.json(); }catch(e){}
   if(!res.ok){
     const msg=(data&&data.error&&data.error.message)||"";
+    if(RELAY){
+      if(msg==="access_code"){ showCodeBox(ACCESS?"通行碼不正確，請重新輸入。":""); throw {code:"need_code"}; }
+      if(msg==="origin_not_allowed") throw {code:"origin",message:location.origin};
+      if(msg==="relay_missing_key") throw {code:"relay_key"};
+    }
     if(res.status===402 || /prepayment credits are depleted/i.test(msg)) throw {code:"no_credit",message:msg};
     if(res.status===503 || res.status===500 || /high demand|overloaded|UNAVAILABLE/i.test(msg)) throw {code:"busy",message:msg};
     if(res.status===429) throw {code:"rate_limited",message:msg};
@@ -557,6 +601,9 @@ const $ = s=>document.querySelector(s);
 const esc = s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const errFull = e=>errCopy(e&&e.code)+((e&&e.message&&["model","server","bad_key","region","busy"].includes(e.code))?`\n（Google：${e.message}）`:"");
 const errCopy = code=>({
+  need_code:"需要輸入診所通行碼，請在頁面上方輸入。",
+  origin:"中繼服務不接受這個網址的連線，請診所負責人到 Cloudflare 檢查 ALLOWED_ORIGIN 設定。",
+  relay_key:"中繼服務還沒有設定 Gemini 金鑰，請診所負責人到 Cloudflare 新增 GEMINI_KEY。",
   no_key:"還沒有設定 Gemini API 金鑰，請到「紀錄與設定」貼上金鑰。",
   bad_key:"金鑰無效或沒有權限，請到「紀錄與設定」確認金鑰是否複製完整。",
   no_credit:"診所的 Gemini 預付餘額已用完，AI 功能暫停。請通知診所負責人到 Google AI Studio 儲值。",
@@ -970,6 +1017,39 @@ $("#saveKey").addEventListener("click", async()=>{
   }finally{ $("#saveKey").disabled=false; }
 });
 $("#clearKey").addEventListener("click",()=>{ AI.key=""; saveAI(); renderAI(); refreshNotice(); $("#keyMsg").textContent="已清除金鑰。"; });
+if(RELAY){
+  $("#directPanel").hidden=true; $("#relayPanel").hidden=false;
+  (async()=>{
+    const d=await relayPing();
+    if(d&&d.needCode&&!d.codeOK) showCodeBox(ACCESS?"通行碼已變更，請重新輸入。":"");
+    if(d&&d.needCode) $("#codeClear").hidden=false;
+  })();
+}
+$("#codeSave").addEventListener("click", async()=>{
+  const v=$("#codeInput").value.trim(); if(!v) return;
+  ACCESS=v; try{localStorage.setItem("ptt-code",v);}catch(e){}
+  $("#codeMsg").textContent="確認中……";
+  const d=await relayPing();
+  if(d&&d.codeOK){ $("#codeBox").classList.remove("on"); $("#codeInput").value=""; }
+  else $("#codeMsg").textContent = d&&d.down ? "連不上中繼服務，請稍後再試。" : "通行碼不正確，請重新輸入。";
+});
+$("#codeInput").addEventListener("keydown",e=>{ if(e.key==="Enter"&&!e.isComposing) $("#codeSave").click(); });
+$("#codeClear").addEventListener("click",()=>{ ACCESS=""; try{localStorage.removeItem("ptt-code");}catch(e){} showCodeBox(""); $("#relayMsg").textContent="已清除。"; });
+$("#relayTest").addEventListener("click", async()=>{
+  $("#relayTest").disabled=true; $("#relayDetail").textContent="";
+  $("#relayMsg").textContent="測試中，可能需要十幾秒……";
+  const d=await relayPing();
+  if(!d||d.down){ $("#relayMsg").textContent="連不上中繼服務，請確認 Worker 網址是否正確、是否已部署。"; $("#relayTest").disabled=false; return; }
+  if(d.originBad){ $("#relayMsg").textContent=errCopy("origin"); $("#relayTest").disabled=false; return; }
+  if(!d.hasKey){ $("#relayMsg").textContent=errCopy("relay_key"); $("#relayTest").disabled=false; return; }
+  try{
+    const r=await aiJSON(TEST_PROMPT,{temperature:0.5,maxTokens:1024});
+    $("#relayMsg").textContent=`連線成功，使用模型 ${AI.model}：${r.say||"OK"}`;
+  }catch(e){
+    $("#relayMsg").textContent=errCopy(e&&e.code);
+    if(e&&e.message) $("#relayDetail").textContent="Google 的原始訊息："+e.message;
+  }finally{ $("#relayTest").disabled=false; }
+});
 $("#goSet").addEventListener("click",()=>document.querySelector('nav.tabs button[data-view="record"]').click());
 
 $("#saveSet").addEventListener("click",()=>{
