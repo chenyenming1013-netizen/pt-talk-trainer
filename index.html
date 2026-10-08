@@ -104,6 +104,13 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
 .clinic-pick{max-width:760px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 24px}
 .clinic-pick select{font:inherit;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%}
 .clinic-pick label{display:grid;gap:4px;font-size:14px;color:var(--ink-2);margin-bottom:12px}
+.mic{border:1px solid var(--line);background:var(--surface);border-radius:12px;width:48px;height:48px;font-size:20px;display:grid;place-items:center;flex:none}
+.mic.on{background:var(--rose);border-color:var(--rose);color:#fff;animation:pulse 1.2s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 6px var(--rose-soft)}}
+.msg .say-btn{border:0;background:transparent;font-size:13px;opacity:.6;padding:0 0 0 6px;cursor:pointer}
+.msg .say-btn:hover{opacity:1}
+.voice-toggle[aria-pressed="true"]{background:var(--sage-soft);border-color:var(--sage)}
+@media (prefers-reduced-motion:reduce){.mic.on{animation:none}}
 .section-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 12px}
 .section-h h2{margin:0;font-size:19px}
 .section-h span{color:var(--ink-2);font-size:13.5px}
@@ -332,6 +339,7 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
         <div class="chat">
           <div class="chat-head">
             <span class="title" id="chatTitle">演練中</span>
+            <button class="btn voice-toggle" data-voice-toggle aria-pressed="false" title="病人用聲音回答">🔈 病人語音</button>
             <button class="btn warn" id="hintBtn">給我一句提示</button>
             <button class="btn primary" id="endBtn">結束並評分</button>
             <button class="btn" id="quitBtn">換病人</button>
@@ -376,6 +384,7 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
         <div class="chat">
           <div class="chat-head">
             <span class="title" id="kTitle">臨床模擬</span>
+            <button class="btn voice-toggle" data-voice-toggle aria-pressed="false" title="病人用聲音回答">🔈 病人語音</button>
             <button class="btn warn" id="kNext">結束本次治療，進入下次回診</button>
             <button class="btn primary" id="kEnd">結案並評分</button>
             <button class="btn" id="kQuit">離開</button>
@@ -457,6 +466,17 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
         </ol>
         <p class="muted" style="font-size:13.5px">免費方案有每分鐘與每日次數上限，出現「次數用完」時等一分鐘或隔天再用。免費方案的內容可能被 Google 用於改進模型，請不要輸入真實病人的姓名、病歷號或可辨識資料。模型若被 Google 停用，改選其他模型或自行輸入新名稱即可。</p>
       </details>
+    </div>
+    <div class="panel" style="margin-bottom:18px">
+      <h2>語音設定</h2>
+      <p class="lead">按輸入框旁的麥克風就能用講的。語音辨識與朗讀使用瀏覽器內建功能，不會用到 AI 額度。電腦版 Chrome、Edge 與 Android 效果最好；iPhone 建議使用 Chrome，或繼續打字。</p>
+      <div class="form">
+        <label style="display:flex;gap:8px;align-items:center;color:var(--ink)"><input type="checkbox" id="vTTS" style="width:auto"> 病人用聲音回答</label>
+        <label style="display:flex;gap:8px;align-items:center;color:var(--ink)"><input type="checkbox" id="vAuto" style="width:auto"> 講完一段話後自動送出（不勾就會先停在輸入框讓你檢查）</label>
+        <label>病人的聲音<select id="vVoice"></select></label>
+        <label>語速 <input type="range" id="vRate" min="0.7" max="1.4" step="0.05"></label>
+        <div><button class="btn" id="vTest">試聽</button> <span class="muted" id="vMsg"></span></div>
+      </div>
     </div>
     <div class="panel" style="margin-bottom:18px">
       <h2>診所設定</h2>
@@ -836,6 +856,7 @@ function renderQuick(){
   $("#quick").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{ $("#input").value=b.textContent; $("#input").focus(); }));
 }
 function addMsg(kind, text, act){
+  if(kind==="pt") return voiceMsg($("#log"), text, S&&S.c&&S.c.name);
   const d=document.createElement("div");
   d.className="msg "+kind;
   if(act){ const a=document.createElement("span"); a.className="act"; a.textContent=act; d.appendChild(a); }
@@ -1125,6 +1146,7 @@ function kSources(){
 }
 document.querySelector('nav.tabs button[data-view="clinic"]').addEventListener("click",()=>{ if(!K) kSources(); });
 function kAdd(kind,text,act){
+  if(kind==="pt") return voiceMsg($("#kLog"), text, K&&K.c&&K.c.name);
   const d=document.createElement("div"); d.className="msg "+kind;
   if(act){ const a=document.createElement("span"); a.className="act"; a.textContent=act; d.appendChild(a); }
   d.appendChild(document.createTextNode(text));
@@ -1486,6 +1508,118 @@ $("#saveSet").addEventListener("click",()=>{
   saveSet(); $("#saveMsg").textContent="已儲存，下一次演練開始生效。";
   setTimeout(()=>$("#saveMsg").textContent="",2500);
 });
+
+/* =================== VOICE =================== */
+const V={tts:false,auto:false,voice:"",rate:1};
+try{ Object.assign(V, JSON.parse(localStorage.getItem("ptt-voice")||"{}")); }catch(e){}
+const saveV=()=>{ try{localStorage.setItem("ptt-voice",JSON.stringify(V));}catch(e){} };
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const canTTS = "speechSynthesis" in window;
+let VOICES=[];
+function loadVoices(){
+  if(!canTTS) return;
+  const all=speechSynthesis.getVoices();
+  VOICES=all.filter(v=>/^zh/i.test(v.lang)).sort((a,b)=>(b.lang==="zh-TW")-(a.lang==="zh-TW"));
+  const sel=document.getElementById("vVoice"); if(!sel) return;
+  sel.innerHTML=`<option value="">自動（依病人性別調整音高）</option>`+VOICES.map(v=>`<option value="${esc(v.name)}">${esc(v.name)}（${esc(v.lang)}）</option>`).join("");
+  sel.value=V.voice||"";
+}
+if(canTTS){ loadVoices(); speechSynthesis.onvoiceschanged=loadVoices; }
+function speakText(text, name){
+  if(!canTTS||!V.tts) return;
+  const clean=String(text).replace(/（[^）]*）|\([^)]*\)/g,"").trim();
+  if(!clean) return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(clean);
+  u.lang="zh-TW"; u.rate=V.rate||1;
+  const v = VOICES.find(x=>x.name===V.voice) || VOICES.find(x=>x.lang==="zh-TW") || VOICES[0];
+  if(v) u.voice=v;
+  const n=String(name||"");
+  if(/先生|阿伯|伯|爺|同學/.test(n)) u.pitch=0.8;
+  else if(/小姐|太太|阿姨|女士|媽|嬤/.test(n)) u.pitch=1.15;
+  if(/阿伯|阿嬤|阿姨|爺/.test(n)) u.rate=(V.rate||1)*0.9;
+  speechSynthesis.speak(u);
+}
+function voiceMsg(log, text, name){
+  const d=document.createElement("div"); d.className="msg pt";
+  d.appendChild(document.createTextNode(text));
+  if(canTTS){
+    const b=document.createElement("button"); b.className="say-btn"; b.type="button"; b.textContent="🔊"; b.title="再聽一次";
+    b.addEventListener("click",()=>{ const t=V.tts; V.tts=true; speakText(text,name); V.tts=t; });
+    d.appendChild(b);
+  }
+  log.appendChild(d); log.scrollTop=log.scrollHeight;
+  speakText(text,name);
+  return d;
+}
+function syncToggles(){
+  document.querySelectorAll("[data-voice-toggle]").forEach(b=>{
+    b.setAttribute("aria-pressed",String(!!V.tts)); b.textContent=V.tts?"🔊 病人語音":"🔈 病人語音";
+    if(!canTTS){ b.hidden=true; }
+  });
+  const t=document.getElementById("vTTS"); if(t) t.checked=!!V.tts;
+}
+document.querySelectorAll("[data-voice-toggle]").forEach(b=>b.addEventListener("click",()=>{
+  V.tts=!V.tts; saveV(); syncToggles(); if(!V.tts&&canTTS) speechSynthesis.cancel();
+}));
+syncToggles();
+
+/* microphone */
+let activeRec=null;
+function attachMic(textarea, sendBtn){
+  if(!SR||!textarea||!sendBtn) return;
+  const btn=document.createElement("button");
+  btn.type="button"; btn.className="mic"; btn.textContent="🎤"; btn.title="用講的（再按一次停止）"; btn.setAttribute("aria-label","語音輸入");
+  sendBtn.parentNode.insertBefore(btn, sendBtn);
+  let rec=null, base="", gotText=false;
+  const stop=()=>{ if(rec){ try{rec.stop();}catch(e){} } };
+  btn.addEventListener("click",()=>{
+    if(rec){ stop(); return; }
+    if(activeRec) activeRec();
+    if(canTTS) speechSynthesis.cancel();
+    rec=new SR(); rec.lang="zh-TW"; rec.interimResults=true; rec.continuous=true;
+    base=textarea.value?textarea.value.replace(/\s*$/,"")+" ":""; gotText=false;
+    rec.onresult=e=>{
+      let fin="", tmp="";
+      for(let i=0;i<e.results.length;i++){ const r=e.results[i]; (r.isFinal?(fin+=r[0].transcript):(tmp+=r[0].transcript)); }
+      textarea.value=base+fin+tmp; gotText = !!(fin+tmp).trim();
+    };
+    rec.onerror=e=>{
+      const m={"not-allowed":"請允許瀏覽器使用麥克風（網址列左邊的鎖頭圖示可以設定）。","no-speech":"沒有聽到聲音，請再試一次。","network":"語音辨識需要網路連線。"}[e.error];
+      if(m) alert(m);
+    };
+    rec.onend=()=>{
+      btn.classList.remove("on"); btn.textContent="🎤"; rec=null; activeRec=null;
+      if(V.auto && gotText && !sendBtn.disabled) sendBtn.click();
+    };
+    activeRec=stop;
+    try{ rec.start(); btn.classList.add("on"); btn.textContent="■"; }catch(e){ rec=null; }
+  });
+}
+attachMic(document.getElementById("input"), document.getElementById("sendBtn"));
+attachMic(document.getElementById("kInput"), document.getElementById("kSend"));
+(function(){ // drill: mic below textarea
+  const ta=document.getElementById("drillInput"), chk=document.getElementById("drillCheck");
+  if(SR&&ta&&chk){ attachMic(ta, chk); }
+  // read the objection aloud when a new question appears
+  const q=document.getElementById("drillQuote");
+  if(q&&canTTS){ new MutationObserver(()=>{ if(V.tts) speakText(q.textContent,""); }).observe(q,{childList:true,characterData:true,subtree:true}); }
+})();
+
+/* settings */
+(function(){
+  const t=$("#vTTS"), a=$("#vAuto"), sel=$("#vVoice"), r=$("#vRate");
+  if(!t) return;
+  t.checked=!!V.tts; a.checked=!!V.auto; r.value=V.rate||1;
+  if(!SR){ a.disabled=true; a.parentNode.style.opacity=.5; }
+  if(!canTTS){ t.disabled=true; sel.disabled=true; $("#vMsg").textContent="這個瀏覽器不支援語音朗讀。"; }
+  if(!SR) $("#vMsg").textContent=($("#vMsg").textContent+" 這個瀏覽器不支援語音輸入，請改用 Chrome 或 Edge。").trim();
+  t.addEventListener("change",()=>{ V.tts=t.checked; saveV(); syncToggles(); });
+  a.addEventListener("change",()=>{ V.auto=a.checked; saveV(); });
+  sel.addEventListener("change",()=>{ V.voice=sel.value; saveV(); });
+  r.addEventListener("input",()=>{ V.rate=+r.value; saveV(); });
+  $("#vTest").addEventListener("click",()=>{ const o=V.tts; V.tts=true; speakText("老師你好，我這個肩膀痛了快半年，晚上都睡不好。","陳先生"); V.tts=o; });
+})();
 </script>
 </body>
 </html>
