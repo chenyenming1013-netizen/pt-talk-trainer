@@ -87,6 +87,23 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
 .examples button{border:1px dashed var(--line);background:transparent;border-radius:99px;padding:3px 10px;font-size:12.5px;color:var(--ink-2)}
 .preview{margin-top:20px;border-top:1px dashed var(--line);padding-top:18px;display:grid;gap:12px}
 @media (max-width:860px){.builder .grid2{grid-template-columns:1fr}}
+.msg.find{align-self:center;max-width:92%;background:var(--sage-soft);border-radius:12px;font-size:14.5px}
+.msg.find .act{color:var(--sage);opacity:1;font-weight:700}
+.msg.warn{align-self:center;max-width:92%;background:var(--rose-soft);border-radius:12px;font-size:14.5px}
+.msg.visit{align-self:stretch;max-width:100%;background:var(--amber-soft);border-radius:12px;font-size:14.5px}
+.tools{display:flex;flex-direction:column;gap:8px;border-top:1px dashed var(--line);padding-top:12px}
+.tools h4{margin:4px 0 0;font-size:13px;color:var(--ink-2);font-weight:500}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{border:1px solid var(--line);background:var(--surface-2);border-radius:99px;padding:3px 10px;font-size:12.5px}
+.chips button:hover{border-color:var(--sage)}
+.chips button.self{border-color:var(--amber)}
+.kstat{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px}
+.kstat div{background:var(--surface-2);border-radius:10px;padding:6px 10px}
+.kstat b{display:block;font-size:18px}
+.compose select{font:inherit;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:8px}
+.clinic-pick{max-width:760px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 24px}
+.clinic-pick select{font:inherit;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%}
+.clinic-pick label{display:grid;gap:4px;font-size:14px;color:var(--ink-2);margin-bottom:12px}
 .section-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 12px}
 .section-h h2{margin:0;font-size:19px}
 .section-h span{color:var(--ink-2);font-size:13.5px}
@@ -230,6 +247,7 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
     </div>
     <nav class="tabs" role="tablist" aria-label="功能">
       <button role="tab" data-view="practice" aria-selected="true">情境演練</button>
+      <button role="tab" data-view="clinic" aria-selected="false">臨床模擬</button>
       <button role="tab" data-view="drill" aria-selected="false">異議快練</button>
       <button role="tab" data-view="library" aria-selected="false">話術庫</button>
       <button role="tab" data-view="record" aria-selected="false">紀錄與設定</button>
@@ -329,6 +347,51 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
     </div>
 
     <div id="reportScreen" hidden></div>
+  </section>
+
+  <!-- ============ CLINIC ============ -->
+  <section class="view" id="view-clinic">
+    <div id="kPick" class="clinic-pick">
+      <h2 style="margin:0 0 4px;font-size:20px">臨床模擬：從初診到痊癒</h2>
+      <p class="muted" style="margin:0 0 16px;font-size:14.5px">AI 扮演病人和病人的身體。你負責問診、做理學檢查、下診斷、安排治療與居家運動，每次回診看病人的疼痛和功能變化，直到病人痊癒。真正的診斷一開始是隱藏的，要靠你自己判斷。</p>
+      <label>病人來源
+        <select id="kSource"></select>
+      </label>
+      <label>難度
+        <select id="kLevel">
+          <option value="入門：典型表現、病史清楚，病人配合度高">入門：典型表現</option>
+          <option value="一般：真實門診，有少量干擾資訊，偶爾忘記做居家運動" selected>一般：真實門診</option>
+          <option value="進階：非典型表現、可能合併其他問題或隱藏紅旗徵象，配合度不穩定">進階：非典型、可能有紅旗</option>
+        </select>
+      </label>
+      <div class="row" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <button class="btn primary" id="kStart">開始看診</button>
+        <span class="muted" id="kStartMsg"></span>
+      </div>
+    </div>
+
+    <div id="kSession" hidden>
+      <div class="session">
+        <aside class="side" id="kSide"></aside>
+        <div class="chat">
+          <div class="chat-head">
+            <span class="title" id="kTitle">臨床模擬</span>
+            <button class="btn warn" id="kNext">結束本次治療，進入下次回診</button>
+            <button class="btn primary" id="kEnd">結案並評分</button>
+            <button class="btn" id="kQuit">離開</button>
+          </div>
+          <div class="log" id="kLog" aria-live="polite"></div>
+          <div class="compose">
+            <select id="kType" aria-label="處置類型">
+              <option>問診</option><option>理學檢查</option><option>診斷</option><option>治療</option><option>居家運動</option><option>衛教說明</option><option>轉介</option>
+            </select>
+            <textarea id="kInput" rows="2" placeholder="輸入你要問的話、要做的檢查或治療內容（Enter 送出）"></textarea>
+            <button class="btn primary" id="kSend">送出</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="kReport" hidden></div>
   </section>
 
   <!-- ============ DRILL ============ -->
@@ -928,7 +991,7 @@ rapport 關係建立、discovery 需求探詢、education 衛教說明、options
 });
 
 const DIMNAME={rapport:"關係建立",discovery:"需求探詢",education:"衛教說明",options:"方案與費用",objection:"顧慮處理",close:"促成決定",ethics:"專業倫理"};
-const DECNAME={accept:"接受建議",think:"回家考慮",decline:"婉拒",none:"尚未決定"};
+const DECNAME={accept:"接受建議",think:"回家考慮",decline:"婉拒",none:"尚未決定",痊癒:"痊癒",未痊癒:"未痊癒"};
 function renderReport(r){
   const dims=r.dims||{};
   const list=a=>(Array.isArray(a)&&a.length)?`<ul>${a.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:`<p class="muted">無</p>`;
@@ -1047,6 +1110,191 @@ async function buildCase(random){
 }
 $("#bBuild").addEventListener("click",()=>buildCase(false));
 $("#bRandom").addEventListener("click",()=>buildCase(true));
+
+/* =================== CLINIC SIM =================== */
+const K_TOOLS={
+  "理學檢查":["觸診","關節活動度 ROM","徒手肌力測試 MMT","特殊測試（請寫測試名稱）","神經學檢查（感覺/反射/肌力）","姿勢與步態評估","功能性動作測試","查看影像或報告"],
+  "儀器治療":["熱療","冰療","電療 TENS","超音波","牽引","體外震波"],
+  "徒手治療":["關節鬆動術","筋膜放鬆","神經鬆動術","軟組織按摩"],
+  "運動治療":["核心穩定訓練","肌力訓練","離心訓練","伸展","本體覺平衡訓練","有氧耐力"],
+};
+const K_SELF=new Set(["體外震波","關節鬆動術","筋膜放鬆","神經鬆動術","肌力訓練","離心訓練","核心穩定訓練"]);
+let K=null;
+function kSources(){
+  $("#kSource").innerHTML=`<option value="">AI 隨機產生新病人（診斷完全隱藏）</option>`+allCases().map(c=>`<option value="${esc(c.id)}">${esc(c.name)}：${esc(c.chief)}</option>`).join("");
+}
+document.querySelector('nav.tabs button[data-view="clinic"]').addEventListener("click",()=>{ if(!K) kSources(); });
+function kAdd(kind,text,act){
+  const d=document.createElement("div"); d.className="msg "+kind;
+  if(act){ const a=document.createElement("span"); a.className="act"; a.textContent=act; d.appendChild(a); }
+  d.appendChild(document.createTextNode(text));
+  $("#kLog").appendChild(d); $("#kLog").scrollTop=$("#kLog").scrollHeight;
+}
+function kSide(){
+  const c=K.c;
+  $("#kSide").innerHTML=`
+    <div class="who"><span class="avatar">${esc(String(c.name).slice(0,1))}</span><div><div class="name">${esc(c.name)}，${esc(c.age)} 歲</div><div class="meta">${esc(c.job)}</div></div></div>
+    <dl class="chart"><dt>主訴</dt><dd>${esc(c.chief)}</dd><dt>你的工作診斷</dt><dd>${esc(K.myDx||"尚未下診斷")}</dd></dl>
+    <div class="kstat">
+      <div>第幾次就診<b>${K.visit}</b></div>
+      <div>經過天數<b>${K.day}</b></div>
+      <div>疼痛（0–10）<b>${K.pain}</b></div>
+      <div>自費累計<b>NT$${K.cost.toLocaleString()}</b></div>
+    </div>
+    <div class="meter-wrap">
+      <div class="meter-row"><span>功能恢復</span><span>${K.func}%</span></div>
+      <div class="meter"><i style="width:${K.func}%"></i></div>
+      <div class="meter-row"><span>病人滿意度</span><span>${K.sat}</span></div>
+      <div class="meter"><i style="width:${K.sat}%;background:var(--amber)"></i></div>
+    </div>
+    <div class="tools">${Object.entries(K_TOOLS).map(([g,arr])=>`<h4>${g}</h4><div class="chips">${arr.map(t=>`<button data-g="${g}" class="${K_SELF.has(t)?'self':''}">${esc(t)}</button>`).join("")}</div>`).join("")}
+      <p class="muted" style="font-size:12px;margin:2px 0 0">黃框為常見自費項目</p></div>`;
+  $("#kSide").querySelectorAll(".chips button").forEach(b=>b.addEventListener("click",()=>{
+    const g=b.dataset.g;
+    $("#kType").value = g==="理學檢查"?"理學檢查":"治療";
+    const t=b.textContent;
+    $("#kInput").value = g==="理學檢查" ? `做${t}：` : `${t}，部位／參數／時間：`;
+    $("#kInput").focus();
+  }));
+}
+function kTranscript(){
+  const sums=K.summaries.map((x,i)=>`第 ${i+1} 次就診摘要：${x}`).join("\n");
+  const now=K.turns.slice(-30).map(t=>`[${t.k}] ${t.t}`).join("\n");
+  return `${sums}\n\n第 ${K.visit} 次就診（第 ${K.day} 天）目前紀錄：\n${now}`;
+}
+function kBase(){
+  return `你是物理治療臨床模擬的引擎，同時扮演病人和病人的身體反應。使用台灣口語繁體中文。
+病人公開資料：${K.c.name}，${K.c.age} 歲，${K.c.job}。主訴：${K.c.chief}。
+【隱藏的真實狀況，不可直接告訴治療師，只能透過問診和檢查結果呈現】
+真正診斷：${K.h.dx}
+關鍵病史線索：${K.h.history}
+關鍵檢查發現：${K.h.findings}
+紅旗或需轉介的狀況：${K.h.redFlags||"無"}
+實證上最適合的處置：${K.h.bestPlan}
+合理的痊癒所需就診次數：約 ${K.h.visits} 次
+難度：${K.level}
+${priceText()}
+目前狀態：疼痛 ${K.pain}/10，功能恢復 ${K.func}%，滿意度 ${K.sat}/100。治療師目前的工作診斷：${K.myDx||"未定"}。
+
+${kTranscript()}`;
+}
+$("#kStart").addEventListener("click", async()=>{
+  if(!hasKey()){ $("#kStartMsg").textContent=errCopy("no_key"); return; }
+  const id=$("#kSource").value, src=allCases().find(c=>c.id===id);
+  $("#kStart").disabled=true; $("#kStartMsg").textContent="AI 正在準備病人，約 10 到 30 秒……";
+  const p=`你要為物理治療臨床模擬設計一位台灣病人，使用台灣繁體中文。
+${src?`以這位病人為基礎：${src.name}，${src.age} 歲，${src.job}，診斷 ${src.dx}，病程 ${src.dur}，主訴 ${src.chief}，已做過 ${src.tried}。`:"自行設計一位物理治療門診常見的病人（肌肉骨骼、神經或運動傷害皆可），診斷要合理但不要太冷門。"}
+難度：${$("#kLevel").value}
+要求：真實診斷要能透過問診與理學檢查推得；bestPlan 要依實證，寫清楚各階段（急性期、修復期、回歸功能）重點，並說明自費項目是否適合；不要包含真實個人資料。
+只回傳 JSON：{"name":"","age":整數,"job":"","chief":"病人自述的主訴","opener":"病人坐下說的第一句話 30 到 60 字","pain":0到10整數,"func":0到100整數（目前功能）,"hidden":{"dx":"真正診斷","history":"關鍵病史線索","findings":"各項理學檢查應有的結果，含陽性與陰性","redFlags":"紅旗徵象，沒有就寫無","bestPlan":"","visits":整數}}`;
+  try{
+    const r=await aiJSON(p,{temperature:0.9,maxTokens:4096});
+    if(!r||!r.name||!r.hidden) throw {code:"parse"};
+    K={c:{name:r.name,age:r.age,job:r.job,chief:r.chief},h:r.hidden,level:$("#kLevel").value,
+       pain:+r.pain||5,func:+r.func||40,sat:60,visit:1,day:1,cost:0,myDx:"",turns:[],summaries:[],busy:false,done:false};
+    $("#kPick").hidden=true; $("#kReport").hidden=true; $("#kSession").hidden=false;
+    $("#kTitle").textContent=`${r.name}的臨床模擬`;
+    $("#kLog").innerHTML=""; kSide();
+    kAdd("sys","第 1 次就診（初診）。先問診和做檢查，再下診斷與安排治療。");
+    kAdd("pt", r.opener||r.chief); K.turns.push({k:"病人",t:r.opener||r.chief});
+    $("#kStartMsg").textContent="";
+  }catch(e){ $("#kStartMsg").textContent=errCopy(e&&e.code); }
+  finally{ $("#kStart").disabled=false; }
+});
+function kBusy(b){ K.busy=b; ["#kSend","#kNext","#kEnd"].forEach(x=>$(x).disabled=b); }
+async function kSendAct(){
+  if(!K||K.busy||K.done) return;
+  const type=$("#kType").value, txt=$("#kInput").value.trim(); if(!txt) return;
+  $("#kInput").value="";
+  kAdd("me",txt,type); K.turns.push({k:"治療師-"+type,t:txt});
+  if(type==="診斷"){ K.myDx=txt; }
+  kBusy(true);
+  const p=`${kBase()}
+
+治療師剛剛的動作：【${type}】${txt}
+
+請依動作類型回應：
+- 問診、衛教說明：病人用口語回答，依隱藏病史誠實但不會主動說出沒被問到的事。
+- 理學檢查：在 finding 寫出客觀檢查結果（例如角度、MMT 分數、測試陽性或陰性與引發的症狀），依隱藏的關鍵檢查發現；reply 可寫病人當下反應。檢查名稱不清楚就請治療師說明。
+- 診斷：病人反應即可，不要透露是否正確。
+- 治療、居家運動：描述病人當下的感受與即時反應。適當的治療可讓當下疼痛稍降、功能小幅提升；真正的進步主要發生在回診之間。不適當或有禁忌的處置要在 warning 說明風險，並可能讓症狀變差。自費項目要計入 cost（新台幣，依診所價格）。
+- 轉介：判斷轉介是否合理，若合理且病人有紅旗，reply 寫病人同意，並在 warning 留空。
+同時評估病人滿意度變化（溝通清楚、有說明、有尊重選擇會上升）。
+只回傳 JSON：{"reply":"病人說的話或反應","finding":"客觀檢查結果，沒有就空字串","warning":"安全或適應症警示，沒有就空字串","pain":0到10,"func":0到100,"sat":0到100,"cost":本次動作新增自費金額整數}`;
+  try{
+    const r=await aiJSON(p,{temperature:0.7});
+    if(r.finding) { kAdd("find",r.finding,"檢查結果"); K.turns.push({k:"檢查結果",t:r.finding}); }
+    if(r.reply){ kAdd("pt",r.reply); K.turns.push({k:"病人",t:r.reply}); }
+    if(r.warning){ kAdd("warn",r.warning,"⚠ 臨床警示"); K.turns.push({k:"警示",t:r.warning}); }
+    kApply(r); kSide();
+  }catch(e){ K.turns.pop(); kAdd("sys",errFull(e)); }
+  finally{ kBusy(false); }
+}
+function kApply(r){
+  const n=(v,lo,hi,d)=>{v=parseInt(v,10);return isNaN(v)?d:Math.max(lo,Math.min(hi,v));};
+  K.pain=n(r.pain,0,10,K.pain); K.func=n(r.func,0,100,K.func); K.sat=n(r.sat,0,100,K.sat);
+  const c=parseInt(r.cost,10); if(c>0) K.cost+=c;
+}
+$("#kSend").addEventListener("click",kSendAct);
+$("#kInput").addEventListener("keydown",e=>{ if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){ e.preventDefault(); kSendAct(); } });
+$("#kNext").addEventListener("click", async()=>{
+  if(!K||K.busy||K.done) return;
+  if(K.turns.filter(t=>t.k.startsWith("治療師")).length<1){ kAdd("sys","這次還沒有任何處置。"); return; }
+  kBusy(true); kAdd("sys","病人回家中……");
+  const p=`${kBase()}
+
+這次就診結束。請：
+1. 用 2 到 3 句寫出這次就診摘要（治療師做了什麼、給了什麼居家運動）。
+2. 決定距離下次回診的天數（依治療師安排，一般 3 到 7 天）。
+3. 依這次的處置是否符合真正診斷與實證、居家運動是否給得清楚、病人配合度（依難度），推算回診時的疼痛與功能。處置正確時功能應穩定進步，錯誤或只做被動治療時進步有限或停滯，有禁忌時可能惡化。
+4. 若功能達 90 以上且疼痛 1 以下，且治療師有給回歸活動或預防復發的指導，healed 設為 true。
+5. report 是病人回診時口語描述這幾天的狀況，可以包含有沒有做運動。
+只回傳 JSON：{"summary":"","days":整數,"report":"","pain":0到10,"func":0到100,"sat":0到100,"healed":true或false}`;
+  try{
+    const r=await aiJSON(p,{temperature:0.6});
+    K.summaries.push(r.summary||"（無摘要）");
+    K.turns=[]; K.visit++; K.day+= (parseInt(r.days,10)||7);
+    kApply(r);
+    kAdd("visit",`第 ${K.visit} 次就診（第 ${K.day} 天）｜疼痛 ${K.pain}/10，功能 ${K.func}%`,"回診");
+    kAdd("pt",r.report||""); K.turns.push({k:"病人",t:r.report||""});
+    kSide();
+    if(r.healed){ kAdd("sys","🎉 病人已達痊癒標準，可以按「結案並評分」。"); }
+  }catch(e){ kAdd("sys",errFull(e)); }
+  finally{ kBusy(false); }
+});
+$("#kQuit").addEventListener("click",()=>{ K=null; $("#kSession").hidden=true; $("#kReport").hidden=true; $("#kPick").hidden=false; kSources(); });
+$("#kEnd").addEventListener("click", async()=>{
+  if(!K||K.busy) return;
+  kBusy(true);
+  $("#kSession").hidden=true; $("#kReport").hidden=false;
+  $("#kReport").innerHTML=`<div class="report"><h2>教練正在看你的整個療程</h2><p class="muted">大約需要半分鐘到一分鐘。</p></div>`;
+  const p=`${kBase()}
+
+療程結束。最後狀態：第 ${K.visit} 次就診、第 ${K.day} 天、疼痛 ${K.pain}/10、功能 ${K.func}%、滿意度 ${K.sat}、自費累計 NT$${K.cost}。
+請以資深物理治療臨床教師身分評分，用台灣繁體中文。七個面向各 1 到 5 分：
+assessment 問診與檢查完整度、diagnosis 診斷正確性、treatment 治療選擇符合實證、progression 療程進階與居家運動、safety 安全與紅旗處理、communication 溝通與衛教、value 自費使用是否恰當與效率（就診次數）。
+另給 0 到 100 總分。
+只回傳 JSON：{"total":整數,"truth":"揭曉真正診斷與關鍵線索","summary":"兩句總評","dims":{"assessment":{"score":整數,"note":""},"diagnosis":{},"treatment":{},"progression":{},"safety":{},"communication":{},"value":{}},"strengths":["最多3點"],"improve":["最多3點"],"ideal":"理想療程的簡要路徑，3 到 5 句"}`;
+  try{
+    const r=await aiJSON(p,{temperature:0.3,maxTokens:8192});
+    const N={assessment:"問診與檢查",diagnosis:"診斷正確性",treatment:"治療選擇",progression:"療程進階",safety:"安全與紅旗",communication:"溝通衛教",value:"自費與效率"};
+    const list=a=>(Array.isArray(a)&&a.length)?`<ul>${a.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:`<p class="muted">無</p>`;
+    $("#kReport").innerHTML=`<div class="report">
+      <h2>${esc(K.c.name)}的療程講評</h2>
+      <p class="muted">${K.visit} 次就診、${K.day} 天，最後疼痛 ${K.pain}/10、功能 ${K.func}%，自費 NT$${K.cost.toLocaleString()}</p>
+      <div class="score-big"><strong>${esc(r.total??"–")}</strong><span>/ 100</span></div>
+      <div class="box good" style="margin-bottom:14px"><h3>真正的診斷</h3>${esc(r.truth||K.h.dx)}<br><span class="muted">你的工作診斷：${esc(K.myDx||"未下診斷")}</span></div>
+      <p style="font-family:var(--hand);font-size:18px">${esc(r.summary||"")}</p>
+      <div class="dims">${Object.keys(N).map(k=>{const d=(r.dims||{})[k]||{};const v=Math.max(0,Math.min(5,+d.score||0));return `<div class="dim ${k==='safety'&&v<=2?'flag':''}"><span>${N[k]}</span><span class="bar"><i style="width:${v*20}%"></i></span><b>${v}</b><small>${esc(d.note||"")}</small></div>`}).join("")}</div>
+      <div class="two"><div class="box good"><h3>做得好的地方</h3>${list(r.strengths)}</div><div class="box fix"><h3>可以更好的地方</h3>${list(r.improve)}</div></div>
+      <p><b>理想療程：</b>${esc(r.ideal||K.h.bestPlan)}</p>
+      <div class="actions"><button class="btn primary" id="kAgain">再看一位病人</button></div></div>`;
+    HIST.push({d:new Date().toISOString(),who:K.c.name+"（臨床）",total:r.total,dec:K.func>=90?"痊癒":"未痊癒",weak:""}); saveHist();
+    K.done=true;
+    $("#kAgain").addEventListener("click",()=>$("#kQuit").click());
+  }catch(e){ $("#kReport").hidden=true; $("#kSession").hidden=false; kAdd("sys",errFull(e)); }
+  finally{ kBusy(false); }
+});
 
 /* =================== DRILL =================== */
 let DI = Math.floor(Math.random()*OBJECTIONS.length), streak=0, drillBusy=false;
