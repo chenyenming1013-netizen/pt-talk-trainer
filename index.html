@@ -185,6 +185,25 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
 .chart{font-size:13.5px;border-top:1px dashed var(--line);padding-top:12px}
 .chart dt{color:var(--ink-2);font-size:12.5px;margin-top:8px}
 .chart dd{margin:0}
+/* 病歷重點卡：放在照片下方最顯眼處 */
+.side{display:grid;grid-template-columns:104px 1fr;column-gap:12px;row-gap:14px;align-content:start}
+.side>.stage{grid-column:1}
+.side>.side-body{display:contents}
+.side>.side-body>*{grid-column:1/-1}
+.side>.side-body>.who{grid-column:2;grid-row:1;align-self:center}
+.side .who .avatar{display:none}
+.side .who .name{font-size:18px}
+.side .stage .av-tip{display:none}
+.side .stage .av-tools{justify-content:center;margin-top:4px}
+.side .stage .av-tools button{font-size:11.5px}
+.side .stage .av-init{font-size:40px}
+.side .stage .av-status{font-size:11px;padding:10px 6px 4px}
+.chart.key{border:1px solid var(--line);border-left:4px solid var(--sage);border-radius:12px;background:var(--sage-soft);padding:10px 14px 12px;margin:0;font-size:15px;line-height:1.5}
+.chart.key dt{font-size:12.5px;font-weight:700;color:var(--sage);margin-top:10px;letter-spacing:.04em}
+.chart.key dt:first-child{margin-top:0}
+.chart.key dd{color:var(--ink)}
+.chart.key dd.dx{font-size:16.5px;font-weight:700}
+@media (max-width:860px){ .side{grid-template-columns:1fr} .side>.side-body>.who{grid-column:1;grid-row:auto} }
 .meter-wrap{border-top:1px dashed var(--line);padding-top:12px}
 .meter-row{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-2)}
 .meter{height:10px;border-radius:99px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden;margin:6px 0 4px}
@@ -948,8 +967,8 @@ function renderSide(){
   const c=S.c;
   $("#side").innerHTML = `
     <div class="who"><span class="avatar">${esc(c.init)}</span><div><div class="name">${esc(c.name)}，${c.age} 歲</div><div class="meta">${esc(c.job)}</div></div></div>
-    <dl class="chart">
-      <dt>診斷</dt><dd>${esc(c.dx)}</dd>
+    <dl class="chart key">
+      <dt>診斷</dt><dd class="dx">${esc(c.dx)}</dd>
       <dt>病程</dt><dd>${esc(c.dur)}</dd>
       <dt>主訴</dt><dd>${esc(c.chief)}</dd>
       <dt>已做過</dt><dd>${esc(c.tried)}</dd>
@@ -1527,7 +1546,7 @@ function kSide(){
   const c=K.c;
   $("#kSide").innerHTML=`
     <div class="who"><span class="avatar">${esc(String(c.name).slice(0,1))}</span><div><div class="name">${esc(c.name)}，${esc(c.age)} 歲</div><div class="meta">${esc(c.job)}</div></div></div>
-    <dl class="chart"><dt>主訴</dt><dd>${esc(c.chief)}</dd><dt>你的工作診斷</dt><dd>${esc(K.myDx||"尚未下診斷")}</dd></dl>
+    <dl class="chart key"><dt>主訴</dt><dd>${esc(c.chief)}</dd><dt>你的工作診斷</dt><dd class="dx">${esc(K.myDx||"尚未下診斷")}</dd></dl>
     <div class="kstat">
       <div>第幾次就診<b>${K.visit}</b></div>
       <div>經過天數<b>${K.day}</b></div>
@@ -2073,6 +2092,7 @@ function getLandmarker(){
   return mpPromise;
 }
 const REDUCED=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+const LIPSYNC=false;   // 改成 true 可恢復嘴型同步
 class Avatar{
   constructor(stage){
     this.stage=stage;
@@ -2138,7 +2158,7 @@ class Avatar{
   }
   loop(t){
     if(!this.stage.isConnected) return;
-    this.updateTalk(t);
+    if(LIPSYNC) this.updateTalk(t); else this.target=0;   // 嘴型同步已關閉：照片保持自然閉口
     const prev=this.open; this.open+=(this.target-this.open)*0.38;
     if(!REDUCED && t>this.nextBlink){ this.blinkStart=t; this.nextBlink=t+2600+Math.random()*3800; }
     const blinking=this.blinkStart && t-this.blinkStart<300;
