@@ -208,7 +208,13 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
 .compose{border-top:1px solid var(--line);padding:12px;display:flex;gap:10px;align-items:flex-end}
 .compose textarea{flex:1;resize:none;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font:inherit;background:var(--surface-2);color:var(--ink);min-height:48px;max-height:160px}
 .quick{display:flex;gap:6px;flex-wrap:wrap;padding:0 12px 10px}
-.quick button{border:1px dashed var(--line);background:transparent;border-radius:99px;padding:3px 10px;font-size:12.5px;color:var(--ink-2)}
+.quick button{border:1px dashed var(--line);background:transparent;border-radius:99px;padding:3px 10px;font-size:12.5px;color:var(--ink-2);text-align:left}
+.quick button.ai{border-style:solid;border-color:var(--sage);color:var(--ink)}
+.quick button:hover{border-color:var(--sage);color:var(--ink)}
+.quick .qlabel{width:100%;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--ink-2);margin-bottom:2px}
+.quick .qlabel b{color:var(--sage);font-weight:700}
+.quick .qmore{border:0;background:transparent;color:var(--ink-2);text-decoration:underline;font-size:12px;padding:0}
+.quick .qgroup{display:flex;gap:6px;flex-wrap:wrap;width:100%}
 .typing{font-size:13px;color:var(--ink-2);align-self:flex-start;padding-left:4px}
 
 /* ---------- report ---------- */
@@ -946,10 +952,61 @@ function renderSide(){
       <div id="foundList">${S.found.length?`<ul>${S.found.map(f=>`<li>${esc(f)}</li>`).join("")}</ul>`:`<p class="empty">病人真正的目標與顧慮還藏著，試著用開放式問題問出來。</p>`}</div>
     </div>`;
 }
-function renderQuick(){
-  const q=["最近這個痛，對你生活影響最大的是什麼？","如果好了，你最想先做什麼？","你最擔心的是什麼？"];
-  $("#quick").innerHTML = q.map(t=>`<button>${esc(t)}</button>`).join("");
-  $("#quick").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{ $("#input").value=b.textContent; $("#input").focus(); }));
+/* ---------- 對話提示：依對話進度變化 ---------- */
+const QSTAGES=[
+  {id:"open",name:"關心開場",re:null,pool:[
+    "{h}你好，今天怎麼了？先跟我說說哪裡不舒服。","{h}你好，最近這個問題困擾你多久了？","今天來之前，有哪個動作特別卡、特別痛？",
+    "先別急著談治療，想先了解一下你平常的工作和生活。","聽起來你很辛苦，這段時間睡得好嗎？","你今天最希望我幫你解決的是什麼？",
+    "之前看過哪些醫師或做過什麼治療？","你今天是自己想來，還是家人建議你來的？"]},
+  {id:"pain",name:"探詢痛點",re:/痛|幾分|什麼時候|哪個動作|多久|影響|睡|晚上|早上/,pool:[
+    "如果 0 分不痛、10 分最痛，現在大概幾分？最痛的時候呢？","一天當中什麼時候最痛？早上、久坐後，還是晚上？",
+    "哪些動作會讓它更痛？有沒有什麼姿勢會比較舒服？","這個痛對你的工作影響大嗎？","晚上會不會痛醒？",
+    "除了痛，有沒有麻、無力或刺刺的感覺？","之前做的治療，哪個有幫助、哪個沒什麼感覺？","最近有沒有什麼事讓它突然變嚴重？",
+    "有沒有發燒、體重莫名減輕，或大小便控制改變？我需要先排除一些狀況。"]},
+  {id:"goal",name:"找出目標",re:/目標|最想|恢復|希望|好了以後|如果好了|想做|期待|打算/,pool:[
+    "如果這個問題解決了，你最想先做什麼？","你希望多久以內看到改善？有什麼重要的時間點嗎？",
+    "以前沒痛的時候，你最喜歡做的事是什麼？","對你來說，怎樣才算是「好了」？","工作上有沒有什麼一定要能做到的動作？",
+    "家人對你這個問題有什麼看法？","你心裡有沒有擔心過最壞的情況？"]},
+  {id:"edu",name:"衛教連結",re:/因為|原因|組織|肌腱|筋膜|發炎|為什麼會|其實是|關節|肌肉|負荷/,pool:[
+    "我用簡單的方式說明一下，你現在痛的原因是……","之前的方法比較像止痛，沒有處理到真正的原因，所以容易復發。",
+    "這種問題通常不是休息就會好，組織需要適當的負荷才會變強。","我們剛剛的檢查發現，你的問題主要在……",
+    "很多人都有類似的狀況，只要方法對，大部分都能明顯改善。","你聽完有沒有哪裡不清楚，或跟你想的不一樣？",
+    "我畫給你看，這條肌腱在這裡，平常走路時會……"]},
+  {id:"opt",name:"提出選項",re:/方案|選擇|自費|健保|費用|價格|次數|元|療程|課程/,pool:[
+    "我給你兩個選擇，一個是健保復健加上回家運動，另一個是……","兩個方案的差別在速度和投入，費用我直接跟你說清楚。",
+    "這個療程大概需要幾次、每週幾次、總共多少錢，我先算給你看。","無論選哪個，回家的運動都是一定要做的。",
+    "你比較傾向哪一個？或是想先試試看再決定？","我不能保證一定會好，但我可以告訴你研究怎麼說，以及我們怎麼追蹤進步。",
+    "在決定之前，我需要先確認你有沒有懷孕、在吃抗凝血藥，或裝心律調節器。"]},
+  {id:"close",name:"處理顧慮並邀約",re:/擔心|考慮|安排|預約|下次|排時間|回家討論|決定/,pool:[
+    "聽起來你最擔心的是費用，還是效果？","要不要先排第一次，做完我們一起看反應，再決定後面要不要繼續？",
+    "你可以回家跟家人討論，我把重點和費用整理給你帶回去。","你的班表怎麼排？我們找一個你方便的時間。",
+    "如果你決定先用健保方案，我也會好好幫你安排。","下次來的時候，我們會用早上第一步的疼痛分數看有沒有進步。",
+    "還有什麼問題，是你今天想問但還沒問的？"]}
+];
+function quickStage(){
+  if(!S) return 0;
+  const said=S.turns.filter(t=>t.role==="therapist").map(t=>t.text);
+  if(!said.length) return 0;
+  if(S.decision&&S.decision!=="none") return 5;
+  for(let i=1;i<QSTAGES.length;i++){ if(!said.some(t=>QSTAGES[i].re.test(t))) return i; }
+  return 5;
+}
+function honor(){ const n=S&&S.c&&S.c.name||""; return n?n+"，":""; }
+function renderQuick(shuffle){
+  if(!S) return;
+  const st=quickStage(), used=new Set(S.turns.filter(t=>t.role==="therapist").map(t=>t.text));
+  if(shuffle||S.qStage!==st){ S.qStage=st; S.qSeed=Math.random(); }
+  const fill=t=>t.replace("{h}",honor());
+  let seed=Math.floor(S.qSeed*1e9)+st;
+  const rnd=()=>{ seed=(seed*1664525+1013904223)%4294967296; return seed/4294967296; };
+  const pickFrom=(arr,n)=>{ const a=arr.map(fill).filter(t=>!used.has(t)); for(let i=a.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a.slice(0,n); };
+  const ai=(S.suggest||[]).filter(t=>t&&!used.has(t)).slice(0,4);
+  const local=pickFrom(QSTAGES[st].pool, ai.length?3:5);
+  const nxt=st<5?pickFrom(QSTAGES[st+1].pool,1):[];
+  $("#quick").innerHTML=`<div class="qlabel"><span>建議階段：<b>${QSTAGES[st].name}</b>${st<5?`　下一步：${QSTAGES[st+1].name}`:""}</span><button class="qmore" type="button">換一批</button></div>
+    <div class="qgroup">${ai.map(t=>`<button class="ai" title="AI 依目前對話建議">${esc(t)}</button>`).join("")}${local.map(t=>`<button>${esc(t)}</button>`).join("")}${nxt.map(t=>`<button title="下一階段">${esc(t)}</button>`).join("")}</div>`;
+  $("#quick").querySelectorAll(".qgroup button").forEach(b=>b.addEventListener("click",()=>{ $("#input").value=b.textContent; $("#input").focus(); }));
+  $("#quick .qmore").addEventListener("click",()=>{ S.suggest=[]; renderQuick(true); });
 }
 function addMsg(kind, text, act){
   if(kind==="pt") return voiceMsg($("#log"), text, S&&S.c);
@@ -1002,14 +1059,14 @@ ${priceText()}
 ${transcript()}
 
 請只回傳一個 JSON 物件，不要任何其他文字：
-{"reply":"你要說的話","trust":0到100的整數（目前是 ${S.trust}，每回合變化通常在 -15 到 +12 之間）,"mood":"4 到 8 字描述你的情緒","revealed":"這回合你透露了哪個原本藏著的目標或顧慮，用一句話寫出；沒有就空字串","decision":"none 或 accept 或 think 或 decline"}`;
+{"reply":"你要說的話","trust":0到100的整數（目前是 ${S.trust}，每回合變化通常在 -15 到 +12 之間）,"mood":"4 到 8 字描述你的情緒","revealed":"這回合你透露了哪個原本藏著的目標或顧慮，用一句話寫出；沒有就空字串","decision":"none 或 accept 或 think 或 decline","suggest":["給治療師的建議：依目前對話進度，治療師下一句可以說的話，共 4 句，策略要不同（例如追問細節、同理情緒、白話衛教、提出選項或邀約），每句 35 字內，台灣口語，符合倫理（不保證療效、不施壓）。這 4 句不是你（病人）說的話"]}`;
 }
 async function send(){
   if(!S || S.busy || S.decisionLocked) return;
   const txt=$("#input").value.trim(); if(!txt) return;
   if(!hasKey()){ addMsg("sys", errCopy("no_key")); return; }
   $("#input").value="";
-  addMsg("me", txt); S.turns.push({role:"therapist", text:txt});
+  addMsg("me", txt); S.turns.push({role:"therapist", text:txt}); S.suggest=[]; renderQuick();
   { const cond=findCond(S.c.dx), items=matchTx(cond,txt);
     if(items.length){ addEvidCard($("#log"), evidCardHTML(cond,items,S.c.dx)); (S.evLog=S.evLog||[]).push(...items.map(i=>i.tx)); } }
   setBusy(true);
@@ -1027,7 +1084,8 @@ async function send(){
     if(r.mood) S.mood=String(r.mood).slice(0,16);
     if(r.revealed && String(r.revealed).trim()) S.found.push(String(r.revealed).trim());
     if(r.decision && r.decision!=="none"){ S.decision=r.decision; showDecision(r.decision); }
-    renderSide();
+    S.suggest=Array.isArray(r.suggest)?r.suggest.map(x=>String(x).trim()).filter(x=>x&&x.length<80):[];
+    renderSide(); renderQuick();
   }catch(e){
     typing.remove();
     S.turns.pop();
