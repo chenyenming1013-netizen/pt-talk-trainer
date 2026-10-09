@@ -405,10 +405,59 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
   .composer .grid3{grid-template-columns:1fr 1fr}
 }
 @media (min-width:700px) and (max-height:620px){ .quick{max-height:64px} }
+/* ---------- 新手示範 ---------- */
+.demo-btn{border-color:var(--sage);color:var(--sage);font-weight:700}
+.demo{position:fixed;inset:0;z-index:60;background:rgba(10,20,25,.5);display:grid;place-items:center;padding:12px}
+body.demo-on{overflow:hidden}
+.demo-box{width:min(980px,100%);height:min(100%,920px);background:var(--bg);border:1px solid var(--line);border-radius:18px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.demo-top{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;padding:14px 18px 8px}
+.demo-top h2{margin:2px 0 0;font-size:19px}
+.demo-top p{margin:2px 0 0;font-size:13px;color:var(--ink-2)}
+#demoClose{white-space:nowrap;flex:none}
+.demo-tag{font-size:12px;font-weight:700;color:var(--sage);background:var(--sage-soft);padding:2px 10px;border-radius:99px}
+.demo-phases{display:flex;gap:6px;overflow-x:auto;padding:4px 18px 10px;border-bottom:1px solid var(--line);flex:none}
+.demo-phases button{white-space:nowrap;border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:3px 11px;font-size:12.5px;color:var(--ink-2)}
+.demo-phases button.on{background:var(--sage);border-color:var(--sage);color:#fff}
+.demo-list{flex:1;min-height:0;overflow:auto;margin:0;padding:14px 18px;list-style:none;display:flex;flex-direction:column;gap:10px;overscroll-behavior:contain}
+.dstep{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;opacity:.72;transition:opacity .2s}
+.dstep.cur{opacity:1;border-color:var(--sage);box-shadow:0 0 0 2px var(--sage-soft)}
+.dhead{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.dnum{width:24px;height:24px;border-radius:50%;background:var(--sage);color:#fff;display:grid;place-items:center;font-size:12.5px;font-weight:700;flex:none}
+.dph{font-size:12px;font-weight:700;color:var(--sage)}
+.dtype{font-size:11.5px;padding:0 8px;border-radius:99px;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2)}
+.dhead b{font-size:15.5px}
+.dline{border-radius:12px;padding:8px 12px;margin:6px 0;font-size:15px;line-height:1.55}
+.dline small{display:block;font-size:11.5px;font-weight:700;opacity:.75}
+.dline.me{background:var(--me);color:var(--me-ink);margin-left:8%}
+.dline.pt{background:var(--patient);margin-right:8%}
+.dnote{font-size:13.5px;color:var(--ink-2)}
+.dnote p{margin:4px 0 0}
+.dnote .pit b{color:var(--rose)}
+.dtake{background:var(--amber-soft);border-radius:14px;padding:12px 16px;font-size:14.5px}
+.dtake ul{margin:6px 0 0;padding-left:20px}
+.demo-ctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 18px;border-top:1px solid var(--line);background:var(--surface);flex:none}
+@media (max-width:600px){ .demo{padding:0} .demo-box{border-radius:0;height:100%} .dline.me,.dline.pt{margin-left:0;margin-right:0} }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
+<div class="demo" id="demo" hidden role="dialog" aria-modal="true" aria-labelledby="demoTitle">
+  <div class="demo-box">
+    <div class="demo-top">
+      <div><span class="demo-tag">新手示範</span><h2 id="demoTitle"></h2><p id="demoWho"></p></div>
+      <button class="btn" id="demoClose" type="button">關閉</button>
+    </div>
+    <div class="demo-phases" id="demoPhases"></div>
+    <ol class="demo-list" id="demoList"></ol>
+    <div class="demo-ctl">
+      <button class="btn" id="demoPrev" type="button">← 上一步</button>
+      <button class="btn primary" id="demoPlay" type="button">▶ 自動播放</button>
+      <button class="btn" id="demoNext" type="button">下一步 →</button>
+      <span class="muted" id="demoPos"></span>
+      <button class="btn" id="demoAll" type="button" style="margin-left:auto">全部展開</button>
+    </div>
+  </div>
+</div>
 <div class="shell">
   <header class="top">
     <div class="brand">
@@ -419,12 +468,12 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
       <button role="tab" data-view="practice" aria-selected="true"><span class="tn">醫病溝通</span><small class="ts">讓病人聽懂、願意投入</small></button>
       <button role="tab" data-view="clinic" aria-selected="false"><span class="tn">臨床推理</span><small class="ts">從問診到痊癒</small></button>
       <button role="tab" data-view="drill" aria-selected="false"><span class="tn">異議快答</span><small class="ts">一句話快速回應</small></button>
-      <button role="tab" data-view="library" aria-selected="false"><span class="tn">話術與實證</span><small class="ts">腳本與實證查核</small></button>
+      <button role="tab" data-view="library" aria-selected="false"><span class="tn">溝通技術與實證</span><small class="ts">腳本與實證查核</small></button>
       <button role="tab" data-view="record" aria-selected="false"><span class="tn">紀錄與設定</span><small class="ts">紀錄、語音、價格</small></button>
     </nav>
   </header>
 
-  <div class="notice" id="aiNotice">還沒有設定 Gemini API 金鑰，所以 AI 病人和評分暫時無法使用。請向診所負責人取得金鑰，到「紀錄與設定」貼上就能開始。沒有金鑰時，仍可以使用「話術與實證」，以及「異議快答」的參考答案。 <button class="btn" id="goSet" style="margin-left:6px">前往設定</button></div>
+  <div class="notice" id="aiNotice">還沒有設定 Gemini API 金鑰，所以 AI 病人和評分暫時無法使用。請向診所負責人取得金鑰，到「紀錄與設定」貼上就能開始。沒有金鑰時，仍可以使用「溝通技術與實證」，以及「異議快答」的參考答案。 <button class="btn" id="goSet" style="margin-left:6px">前往設定</button></div>
 
   <div class="notice" id="codeBox">
     <b>請輸入診所通行碼</b>（向診所負責人詢問，每台裝置只需輸入一次）
@@ -490,7 +539,7 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
         </div>
         <label style="margin-top:12px">其他補充（選填）<textarea id="cMore" placeholder="例如：女兒陪同、下個月要出國、之前在別家做過震波沒效、很怕痛……"></textarea></label>
         <div class="row">
-          <button class="btn primary" type="button" id="cBuild">用 AI 建構人設</button><button class="btn" type="button" id="cQuick">直接開始</button>
+          <button class="btn primary" type="button" id="cBuild">用 AI 建構人設</button><button class="btn" type="button" id="cQuick">直接開始</button><button class="btn demo-btn" type="button" data-demo="c">🎓 新手示範</button>
           <button class="btn" type="button" data-dice="c">🎲 全部隨機填入</button>
           <button class="btn" type="button" data-clear="c">清除</button>
           <span class="muted" id="cMsg"></span>
@@ -558,6 +607,7 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
         <label style="margin-top:12px">其他補充（選填）<textarea id="kMore" placeholder="例如：女兒陪同、下個月要出國、之前在別家做過震波沒效、很怕痛……"></textarea></label>
         <div class="row">
           <button class="btn primary" type="button" id="kStart">開始看診</button>
+          <button class="btn demo-btn" type="button" data-demo="k">🎓 新手示範</button>
           <button class="btn" type="button" data-dice="k">🎲 全部隨機填入</button>
           <button class="btn" type="button" data-clear="k">清除</button>
           <span class="muted" id="kMsg"></span>
@@ -627,7 +677,7 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
 
   <!-- ============ LIBRARY ============ -->
   <section class="view" id="view-library">
-    <div class="vhead"><h2>話術與實證</h2><p>說明腳本、實證查核與 AI 生成話術</p></div>
+    <div class="vhead"><h2>溝通技術與實證</h2><p>說明腳本、實證查核與 AI 生成溝通範例</p></div>
     <div class="lib">
       <div class="lib-nav" id="libNav"></div>
       <div class="panel" id="libPanel"></div>
@@ -797,7 +847,7 @@ const LIB = {
   ]},
   cond:{title:"各診斷說明腳本"},
   evid:{title:"實證查核"},
-  gen:{title:"AI 生成話術"},
+  gen:{title:"AI 生成溝通範例"},
   mods:{title:"各項治療的白話說明"},
   obj:{title:"常見異議與回應"},
   ethic:{title:"說明自費的底線", lead:"這些是教練評分時的扣分項，也是保護你和病人的界線。"}
@@ -1006,7 +1056,7 @@ function caseCard(c,own){
     </button>${own?`<button class="del" data-del="${esc(c.id)}" aria-label="刪除${esc(c.name)}">刪除</button>`:''}</div>`;
 }
 function renderCases(){
-  $("#cases").innerHTML = CUSTOM.length ? CUSTOM.map(c=>caseCard(c,true)).join("") : `<p class="muted" style="grid-column:1/-1;margin:0">還沒有儲存的病人。在上方組一位病人，按「用 AI 建構人設」後就能儲存。</p>`;
+  $("#cases").innerHTML = CUSTOM.length ? CUSTOM.map(c=>caseCard(c,true)).join("") : `<p class="muted" style="grid-column:1/-1;margin:0">還沒有儲存的病人。先在「組一位病人」填好條件，按「用 AI 建構人設」後就能儲存。</p>`;
   document.querySelectorAll(".case[data-id]").forEach(el=>el.addEventListener("click",()=>startSession(el.dataset.id)));
   document.querySelectorAll("[data-del]").forEach(el=>el.addEventListener("click",e=>{
     e.stopPropagation();
@@ -1971,7 +2021,7 @@ function renderLib(){
       <p class="muted" style="font-size:13px">${esc(ESWT_NOTE)}</p>
       <p class="muted" style="font-size:12.5px">等級說明：JOSPT 指引 A＝強證據、B＝中等、C＝弱、D＝證據矛盾、E＝理論或基礎研究、F＝專家意見；ACR 指引為強烈或有條件。這是教育訓練工具，臨床決策請以最新指引與醫師判斷為準。</p>`;
   }else if(libSel==="gen"){
-    h=`<h2>AI 生成話術</h2><p class="lead">指定診斷和情境，AI 會產生可以直接說出口的溝通腳本。內建實證資料庫裡的診斷，腳本只會推薦有依據的處置，並標出引用來源；生成後系統會再檢查一次，提到不建議的處置會標紅提醒。</p>
+    h=`<h2>AI 生成溝通範例</h2><p class="lead">指定診斷和情境，AI 會產生可以直接說出口的溝通腳本。內建實證資料庫裡的診斷，腳本只會推薦有依據的處置，並標出引用來源；生成後系統會再檢查一次，提到不建議的處置會標紅提醒。</p>
       <div class="lib-form">
         <label>診斷或情境<input id="gDx" list="dlEvCond" placeholder="例如：足底筋膜炎、五十肩、產後骨盆痛"></label>
         <datalist id="dlEvCond">${EVID.map(c=>`<option value="${esc(c.name)}">`).join("")}</datalist>
@@ -1980,10 +2030,10 @@ function renderLib(){
         </select></label>
         <label>病人個性（選填）<input id="gPers" list="dlPers" placeholder="例如：多疑、愛比價"></label>
         <label>補充（選填）<textarea id="gMore" placeholder="例如：病人說「健保做做就好」、女兒陪同、預算有限"></textarea></label>
-        <div><button class="btn primary" id="gBtn">生成話術</button> <span class="muted" id="gMsg"></span></div>
+        <div><button class="btn primary" id="gBtn">生成溝通範例</button> <span class="muted" id="gMsg"></span></div>
       </div>
-      <h3 style="font-size:16px;margin:18px 0 10px">我的話術（存在這台裝置）</h3>
-      <div id="gList">${SCRIPTS.length?SCRIPTS.map((sc,i)=>scriptCard(sc,i)).reverse().join(""):`<p class="muted">還沒有生成的話術。</p>`}</div>`;
+      <h3 style="font-size:16px;margin:18px 0 10px">我的溝通範例（存在這台裝置）</h3>
+      <div id="gList">${SCRIPTS.length?SCRIPTS.map((sc,i)=>scriptCard(sc,i)).reverse().join(""):`<p class="muted">還沒有生成的溝通範例。</p>`}</div>`;
   }else if(libSel==="mods"){
     h=`<h2>各項治療的白話說明</h2><p class="lead">病人聽得懂，才會願意投入。標示「常見自費」的項目，說明時記得一併講費用與次數。</p>`;
     let g="";
@@ -2033,7 +2083,7 @@ ${ESWT_NOTE}`:"這個診斷不在內建實證資料庫：只能使用保守、�
     SCRIPTS.push({d:new Date().toISOString(),dx,type,pers,title:r.title,steps:r.steps,evidence:Array.isArray(r.evidence)?r.evidence:[]});
     saveScripts(); renderLib();
     const f=scriptFlags(SCRIPTS[SCRIPTS.length-1]);
-    $("#gMsg").textContent=f.length?"已生成，但腳本提到指引不建議的處置，請看紅色提醒。":"已生成，存在下方「我的話術」。";
+    $("#gMsg").textContent=f.length?"已生成，但腳本提到指引不建議的處置，請看紅色提醒。":"已生成，存在下方「我的溝通範例」。";
   }catch(e){ $("#gMsg").textContent=errCopy(e&&e.code); }
   finally{ const b=document.getElementById("gBtn"); if(b) b.disabled=false; }
 }
@@ -2572,6 +2622,97 @@ attachMic(document.getElementById("kInput"), document.getElementById("kSend"));
   const vc=$("#vCloud"); vc.value=V.cloud===false?"0":"1"; showCloudStatus();
   vc.addEventListener("change",()=>{ V.cloud=vc.value==="1"; saveV(); cloudFails=0; });
 })();
+/* =================== 新手示範：AI 依標準流程排好每個動作與病人回應 =================== */
+const DEMO_PHASES={
+  c:["關心開場","探詢痛點","找出目標","衛教連結","提出選項","處理顧慮並邀約"],
+  k:["問診","紅旗篩檢","理學檢查","診斷與鑑別","治療計畫","衛教說明","居家運動","回診追蹤","結案與預防"]
+};
+const DEMO={steps:[],i:-1,timer:null,mode:"c",c:null};
+function demoPrompt(mode){
+  const comp=composerText(readComposer(mode));
+  const src=mode==="k"?allCases().find(c=>c.id===$("#kSource").value):null;
+  const who=src?`以這位病人為基礎：${src.name}，${src.gender||""}，${src.age} 歲，${src.job}，診斷 ${src.dx}，病程 ${src.dur}，主訴 ${src.chief}，已做過 ${src.tried}。`
+    :`病人條件（未指定的由你合理決定，年齡、職業、部位、病程與診斷要合理搭配）：\n${comp}`;
+  const ph=DEMO_PHASES[mode];
+  const focus=mode==="c"?`練習重點：${$("#cFocus").value||"依病情判斷是否適合自費"}。`:"";
+  const goal=mode==="c"
+    ?`示範一位資深物理治療師如何在一次門診中，依「${ph.join("→")}」六個步驟，和病人好好溝通，讓病人聽懂自己的問題、選到適合的方案（含是否適合自費）。不誇大療效、不製造恐懼、一定給選擇；病人不適合自費時要誠實說。`
+    :`示範一位資深物理治療師如何從初診一路照顧到結案，依「${ph.join("→")}」的順序完成臨床推理：問診要問出關鍵病史，紅旗篩檢不可省略，理學檢查要寫出測試名稱與結果，診斷要說明鑑別理由，治療要依實證並寫出運動劑量（組數、次數、頻率），回診要依疼痛與功能進步調整。`;
+  return `你是台灣物理治療臨床教師，要為「新手物理治療師」製作一份逐步示範，使用台灣繁體中文與台灣臨床慣用語。
+${who}
+${focus}
+${goal}
+規則：
+1. 產生 14 到 20 個步驟，每一步只做一件事，依真實門診順序排列；phase 必須是以下其中之一：${ph.join("、")}。
+2. 每一步寫出治療師的動作（action，15 字內）、治療師實際說的話或做的事（say）、AI 病人或身體的回應（resp：病人會怎麼回答、檢查結果是什麼、病人反應如何），以及為什麼要這樣做（why）和新手最常犯的錯（pitfall）。
+3. 病人說話要口語、符合個性與年齡；檢查結果要和診斷一致。
+4. 不要保證療效，不要包含真實個人資料。
+只回傳 JSON：{"title":"示範標題","patient":{"name":"","gender":"男或女","age":整數,"job":"","dx":"診斷","chief":"主訴","personality":""},"steps":[{"phase":"","type":"問診、理學檢查、診斷、治療、居家運動、衛教說明、溝通 其中之一","action":"","say":"","resp":"","why":"","pitfall":""}],"takeaways":["新手要記住的 3 到 5 個重點"]}`;
+}
+async function demoStart(mode){
+  const msg=$("#"+mode+"Msg");
+  if(!hasKey()){ msg.textContent=errCopy("no_key"); return; }
+  const btn=document.querySelector(`[data-demo="${mode}"]`); btn.disabled=true;
+  msg.textContent="AI 正在排好新手示範流程，約 20 到 40 秒……";
+  try{
+    const r=await aiJSON(demoPrompt(mode),{temperature:0.7,maxTokens:8192});
+    if(!r||!Array.isArray(r.steps)||!r.steps.length) throw {code:"parse"};
+    const ph=DEMO_PHASES[mode], idx=p=>{ const i=ph.findIndex(x=>String(p||"").includes(x)||x.includes(String(p||"")));
+      return i<0?ph.length:i; };
+    // 自動排序：依標準流程的階段排列，同一階段內維持 AI 給的先後
+    DEMO.steps=r.steps.map((s,n)=>({...s,_p:idx(s.phase),_n:n})).sort((a,b)=>a._p-b._p||a._n-b._n)
+      .map(s=>({...s,phase:ph[s._p]||s.phase||"其他"}));
+    DEMO.mode=mode; DEMO.c=r.patient||{}; DEMO.title=r.title||"新手示範"; DEMO.take=r.takeaways||[];
+    msg.textContent=""; demoOpen();
+  }catch(e){ msg.textContent=errCopy(e&&e.code); }
+  finally{ btn.disabled=false; }
+}
+function demoOpen(){
+  const c=DEMO.c, ph=DEMO_PHASES[DEMO.mode];
+  $("#demo").hidden=false; document.body.classList.add("demo-on");
+  $("#demoTitle").textContent=DEMO.title;
+  $("#demoWho").textContent=[c.name&&`${c.name}${c.age?`，${c.age} 歲`:""}`,c.job,c.dx&&`診斷：${c.dx}`,c.chief&&`主訴：${c.chief}`].filter(Boolean).join("｜");
+  $("#demoPhases").innerHTML=ph.map((p,i)=>`<button type="button" data-ph="${i}">${i+1}. ${esc(p)}</button>`).join("");
+  $("#demoPhases").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{
+    const j=DEMO.steps.findIndex(s=>s._p===+b.dataset.ph); if(j>=0) demoGo(j,true); }));
+  $("#demoList").innerHTML=DEMO.steps.map((s,i)=>`
+    <li class="dstep" data-i="${i}" hidden>
+      <div class="dhead"><span class="dnum">${i+1}</span><span class="dph">${esc(s.phase)}</span>${s.type?`<span class="dtype">${esc(s.type)}</span>`:""}<b>${esc(s.action||"")}</b></div>
+      ${s.say?`<div class="dline me"><small>治療師</small>${esc(s.say)}</div>`:""}
+      ${s.resp?`<div class="dline pt"><small>AI 病人回應</small>${esc(s.resp)}</div>`:""}
+      <div class="dnote">${s.why?`<p><b>為什麼：</b>${esc(s.why)}</p>`:""}${s.pitfall?`<p class="pit"><b>新手常見錯誤：</b>${esc(s.pitfall)}</p>`:""}</div>
+    </li>`).join("")+(DEMO.take.length?`<li class="dtake" hidden><b>這次示範的重點</b><ul>${DEMO.take.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></li>`:"");
+  DEMO.i=-1; demoGo(0);
+}
+function demoGo(i,showAll){
+  const items=[...$("#demoList").querySelectorAll(".dstep")], n=items.length;
+  i=Math.max(0,Math.min(n-1,i)); DEMO.i=i;
+  items.forEach((el,k)=>{ el.hidden=!(showAll?true:k<=i); el.classList.toggle("cur",k===i); });
+  const tk=$("#demoList").querySelector(".dtake"); if(tk) tk.hidden=!(showAll||i===n-1);
+  const cur=items[i]; if(cur) cur.scrollIntoView({block:"nearest",behavior:REDUCED?"auto":"smooth"});
+  const s=DEMO.steps[i];
+  $("#demoPhases").querySelectorAll("button").forEach(b=>b.classList.toggle("on",+b.dataset.ph===s._p));
+  $("#demoPos").textContent=`第 ${i+1} / ${n} 步`;
+  $("#demoPrev").disabled=i===0; $("#demoNext").disabled=i===n-1;
+  if(V.tts&&s&&s.resp&&!showAll) speakText(s.resp,DEMO.c);
+}
+function demoPlay(on){
+  clearInterval(DEMO.timer); DEMO.timer=null;
+  $("#demoPlay").textContent=on?"⏸ 暫停":"▶ 自動播放";
+  if(!on) return;
+  DEMO.timer=setInterval(()=>{ if(DEMO.i>=DEMO.steps.length-1) return demoPlay(false); demoGo(DEMO.i+1); },
+    Math.max(5000,(V.tts?9000:7000)/(V.rate||1)));
+}
+function demoClose(){ demoPlay(false); ttsCancel&&ttsCancel(); $("#demo").hidden=true; document.body.classList.remove("demo-on"); }
+document.querySelectorAll("[data-demo]").forEach(b=>b.addEventListener("click",()=>demoStart(b.dataset.demo)));
+$("#demoPrev").addEventListener("click",()=>{ demoPlay(false); demoGo(DEMO.i-1); });
+$("#demoNext").addEventListener("click",()=>{ demoPlay(false); demoGo(DEMO.i+1); });
+$("#demoPlay").addEventListener("click",()=>demoPlay(!DEMO.timer));
+$("#demoAll").addEventListener("click",()=>{ demoPlay(false); demoGo(DEMO.steps.length-1,true); });
+$("#demoClose").addEventListener("click",demoClose);
+$("#demo").addEventListener("click",e=>{ if(e.target.id==="demo") demoClose(); });
+document.addEventListener("keydown",e=>{ if($("#demo").hidden) return;
+  if(e.key==="Escape") demoClose(); else if(e.key==="ArrowRight") $("#demoNext").click(); else if(e.key==="ArrowLeft") $("#demoPrev").click(); });
 </script>
 </body>
 </html>
