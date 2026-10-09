@@ -43,7 +43,12 @@ header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:1
 .brand h1{font-family:var(--hand);font-weight:700;font-size:clamp(28px,4.4vw,40px);line-height:1.15;margin:0;letter-spacing:.02em}
 .brand p{margin:4px 0 0;color:var(--ink-2);font-size:14.5px}
 nav.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px;flex-wrap:wrap}
-nav.tabs button{border:0;background:transparent;padding:8px 14px;border-radius:9px;font-size:15px;color:var(--ink-2)}
+nav.tabs button{border:0;background:transparent;padding:7px 14px;border-radius:9px;font-size:15px;color:var(--ink-2);display:flex;flex-direction:column;align-items:center;line-height:1.25}
+nav.tabs button .ts{font-size:11px;opacity:.75;font-weight:400;margin-top:1px;white-space:nowrap}
+.vhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:0 0 14px}
+.vhead h2{margin:0;font-size:21px}
+.vhead p{margin:0;color:var(--ink-2);font-size:14.5px}
+@media (max-width:640px){ nav.tabs button .ts{display:none} }
 nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
 .view{display:none}.view.on{display:block}
 
@@ -315,15 +320,15 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
       <p>跟 AI 病人練習說明、探詢需求與自費療程建議，練完馬上拿到教練講評。</p>
     </div>
     <nav class="tabs" role="tablist" aria-label="功能">
-      <button role="tab" data-view="practice" aria-selected="true">情境演練</button>
-      <button role="tab" data-view="clinic" aria-selected="false">臨床模擬</button>
-      <button role="tab" data-view="drill" aria-selected="false">異議快練</button>
-      <button role="tab" data-view="library" aria-selected="false">專業溝通訓練</button>
-      <button role="tab" data-view="record" aria-selected="false">紀錄與設定</button>
+      <button role="tab" data-view="practice" aria-selected="true"><span class="tn">醫病溝通</span><small class="ts">讓病人聽懂、願意投入</small></button>
+      <button role="tab" data-view="clinic" aria-selected="false"><span class="tn">臨床推理</span><small class="ts">從問診到痊癒</small></button>
+      <button role="tab" data-view="drill" aria-selected="false"><span class="tn">異議快答</span><small class="ts">一句話快速回應</small></button>
+      <button role="tab" data-view="library" aria-selected="false"><span class="tn">話術與實證</span><small class="ts">腳本與實證查核</small></button>
+      <button role="tab" data-view="record" aria-selected="false"><span class="tn">紀錄與設定</span><small class="ts">紀錄、語音、價格</small></button>
     </nav>
   </header>
 
-  <div class="notice" id="aiNotice">還沒有設定 Gemini API 金鑰，所以 AI 病人和評分暫時無法使用。請向診所負責人取得金鑰，到「紀錄與設定」貼上就能開始。沒有金鑰時，仍可以使用專業溝通訓練，以及異議快練的「參考答案」。 <button class="btn" id="goSet" style="margin-left:6px">前往設定</button></div>
+  <div class="notice" id="aiNotice">還沒有設定 Gemini API 金鑰，所以 AI 病人和評分暫時無法使用。請向診所負責人取得金鑰，到「紀錄與設定」貼上就能開始。沒有金鑰時，仍可以使用「話術與實證」，以及「異議快答」的參考答案。 <button class="btn" id="goSet" style="margin-left:6px">前往設定</button></div>
 
   <div class="notice" id="codeBox">
     <b>請輸入診所通行碼</b>（向診所負責人詢問，每台裝置只需輸入一次）
@@ -336,6 +341,7 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
 
   <!-- ============ PRACTICE ============ -->
   <section class="view on" id="view-practice">
+    <div class="vhead"><h2>醫病溝通</h2><p>怎麼說，病人才聽得懂、願意投入</p></div>
     <div id="pickScreen">
       <div class="intro">
         <div class="flow">
@@ -427,9 +433,10 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
 
   <!-- ============ CLINIC ============ -->
   <section class="view" id="view-clinic">
+    <div class="vhead"><h2>臨床推理</h2><p>從問診到痊癒，選出有實證的治療</p></div>
     <div id="kPick">
       <div class="composer" id="kComposer">
-        <h2>臨床模擬：從初診到痊癒</h2>
+        <h2>臨床推理：從初診到痊癒</h2>
         <p class="muted" style="margin:0;font-size:14.5px">AI 扮演病人和病人的身體。你負責問診、做理學檢查、下診斷、安排治療與居家運動，每次回診看疼痛和功能的變化，直到痊癒。條件可以自由搭配，留空就隨機；真正的診斷會隱藏起來，要靠你自己推理。</p>
         <div class="grid3">
           <label>年齡<input id="kAge" list="dlAge" placeholder="隨機"></label>
@@ -461,7 +468,7 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
         <aside class="side"><div class="stage" id="stageK"></div><div class="side-body" id="kSide"></div></aside>
         <div class="chat">
           <div class="chat-head">
-            <span class="title" id="kTitle">臨床模擬</span>
+            <span class="title" id="kTitle">臨床推理</span>
             <button class="btn voice-toggle" data-voice-toggle aria-pressed="false" title="病人用聲音回答">🔈 病人語音</button>
             <button class="btn warn" id="kNext">結束本次治療，進入下次回診</button>
             <button class="btn primary" id="kEnd">結案並評分</button>
@@ -497,6 +504,7 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
 
   <!-- ============ DRILL ============ -->
   <section class="view" id="view-drill">
+    <div class="vhead"><h2>異議快答</h2><p>病人一句異議，練習三十秒內回應</p></div>
     <div class="drill">
       <div class="card">
         <div class="row" style="margin-top:0">
@@ -517,6 +525,7 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
 
   <!-- ============ LIBRARY ============ -->
   <section class="view" id="view-library">
+    <div class="vhead"><h2>話術與實證</h2><p>說明腳本、實證查核與 AI 生成話術</p></div>
     <div class="lib">
       <div class="lib-nav" id="libNav"></div>
       <div class="panel" id="libPanel"></div>
@@ -525,6 +534,7 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
 
   <!-- ============ RECORD ============ -->
   <section class="view" id="view-record">
+    <div class="vhead"><h2>紀錄與設定</h2><p>練習紀錄、AI 連線、語音與診所價格</p></div>
     <div class="panel" style="margin-bottom:18px" id="relayPanel" hidden>
       <h2>AI 連線</h2>
       <p class="lead">這個網站透過診所的中繼服務連到 AI，不需要輸入金鑰。</p>
@@ -554,7 +564,7 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
           <li>用 Google 帳號登入 Google AI Studio（aistudio.google.com）。</li>
           <li>點左側或右上角的「Get API key」，再按「Create API key」。</li>
           <li>複製產生的金鑰（開頭可能是 AIza 或 AQ.），貼到上面的欄位並按「儲存並測試連線」。</li>
-          <li>看到「連線成功」就可以回到「情境演練」開始練習。</li>
+          <li>看到「連線成功」就可以回到「醫病溝通」開始練習。</li>
         </ol>
         <p class="muted" style="font-size:13.5px">免費方案有每分鐘與每日次數上限，出現「次數用完」時等一分鐘或隔天再用。免費方案的內容可能被 Google 用於改進模型，請不要輸入真實病人的姓名、病歷號或可辨識資料。模型若被 Google 停用，改選其他模型或自行輸入新名稱即可。</p>
       </details>
@@ -595,7 +605,7 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
     <div class="panel">
       <h2>演練紀錄</h2>
       <div class="tblwrap"><table class="hist"><thead><tr><th>日期</th><th>病人</th><th>總分</th><th>病人決定</th><th>最弱的一項</th></tr></thead><tbody id="histBody"></tbody></table></div>
-      <p class="muted" id="histEmpty">還沒有紀錄。完成一次情境演練並評分後會出現在這裡。</p>
+      <p class="muted" id="histEmpty">還沒有紀錄。完成一次醫病溝通或臨床推理並評分後會出現在這裡。</p>
     </div>
   </section>
 </div>
@@ -1590,7 +1600,7 @@ ${composerText(readComposer("k"))}
     K={c:{name:r.name,gender:r.gender,age:r.age,job:r.job,chief:r.chief,personality:r.personality,look:r.look||(src&&src.look)||"",img:src&&src.img},h:r.hidden,level:$("#kLevel").value,
        pain:+r.pain||5,func:+r.func||40,sat:60,visit:1,day:1,cost:0,myDx:"",turns:[],summaries:[],busy:false,done:false};
     $("#kPick").hidden=true; $("#kReport").hidden=true; $("#kSession").hidden=false;
-    $("#kTitle").textContent=`${r.name}的臨床模擬`;
+    $("#kTitle").textContent=`${r.name}的臨床推理`;
     $("#kLog").innerHTML=""; kSide();
     kAdd("sys","第 1 次就診（初診）。先問診和做檢查，再下診斷與安排治療。");
     showPortrait(avatarK(), K.c, ()=>{ if(src){ src.img=K.c.img; saveCustom(); renderCases(); } });
@@ -1780,7 +1790,7 @@ $("#drillCheck").addEventListener("click", async()=>{
       <p style="margin:10px 0 4px"><b>做得好：</b>${esc(r.good)}</p>
       <p style="margin:0 0 8px"><b>可以改：</b>${esc(r.fix)}</p>
       <div class="say">${esc(r.better)}</div>
-      <details style="margin-top:8px"><summary class="muted" style="cursor:pointer">看專業溝通訓練的參考答案</summary><div class="say">${esc(o.a)}</div></details>`;
+      <details style="margin-top:8px"><summary class="muted" style="cursor:pointer">看參考答案</summary><div class="say">${esc(o.a)}</div></details>`;
   }catch(e){ $("#drillResult").innerHTML=`<p class="muted">${esc(errCopy(e&&e.code))}</p>`; }
   finally{ drillBusy=false; $("#drillCheck").disabled=false; }
 });
