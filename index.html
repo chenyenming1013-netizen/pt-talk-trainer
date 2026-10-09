@@ -146,7 +146,7 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
 .av-tools{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:6px;font-size:12.5px;color:var(--ink-2)}
 .av-tools button{border:0;background:transparent;color:var(--ink-2);font-size:12.5px;text-decoration:underline;padding:2px;white-space:nowrap}
 .avatar.photo{object-fit:cover;padding:0}
-@media (max-width:860px){
+@media (max-width:699px){
   .stage{position:fixed;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 104px);width:118px;z-index:20;border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.35);background:var(--surface)}
   .stage .av-tools{display:none}
   .stage .av-init{font-size:40px}
@@ -203,7 +203,7 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
 .chart.key dt:first-child{margin-top:0}
 .chart.key dd{color:var(--ink)}
 .chart.key dd.dx{font-size:16.5px;font-weight:700}
-@media (max-width:860px){ .side{grid-template-columns:1fr} .side>.side-body>.who{grid-column:1;grid-row:auto} }
+@media (max-width:699px){ .side{grid-template-columns:1fr} .side>.side-body>.who{grid-column:1;grid-row:auto} }
 .meter-wrap{border-top:1px dashed var(--line);padding-top:12px}
 .meter-row{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-2)}
 .meter{height:10px;border-radius:99px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden;margin:6px 0 4px}
@@ -318,9 +318,6 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
 
 @media (max-width:860px){
   .intro{grid-template-columns:1fr}
-  .session{grid-template-columns:1fr;height:auto}
-  .side{order:2}
-  .chat{height:72vh;min-height:480px}
   .lib{grid-template-columns:1fr}
   .lib-nav{position:static;flex-direction:row;overflow-x:auto}
   .lib-nav button{white-space:nowrap}
@@ -328,6 +325,86 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
   .dim{grid-template-columns:96px 1fr 30px}
   .msg{max-width:90%}
 }
+@media (max-width:699px){
+  .session{grid-template-columns:1fr;height:auto}
+  .side{order:2}
+  .chat{height:72vh;min-height:480px}
+}
+/* ---------- 平板與電腦：整頁固定在一個畫面，不用上下拖拉 ---------- */
+@media (min-width:700px){
+  html,body{height:100%;overflow:hidden}
+  .shell{height:100vh;height:100dvh;display:flex;flex-direction:column;max-width:1320px;padding:10px 16px 12px}
+  header.top{flex:none;align-items:center;flex-wrap:nowrap;margin-bottom:8px}
+  .brand h1{font-size:24px;white-space:nowrap}
+  .brand p{display:none}
+  .notice.on{flex:none;margin-bottom:8px;padding:8px 14px}
+  .view.on{flex:1;min-height:0;display:flex;flex-direction:column;overflow:auto;overscroll-behavior:contain}
+  .vhead{flex:none;margin-bottom:8px}
+  .vhead h2{font-size:18px}
+  .view:has(#sessionScreen:not([hidden])) .vhead,.view:has(#kSession:not([hidden])) .vhead{display:none}
+  #sessionScreen:not([hidden]),#kSession:not([hidden]){flex:1;min-height:0;display:flex;flex-direction:column}
+  .session{flex:1;height:auto;min-height:0;grid-template-columns:280px 1fr;gap:12px}
+  .side{min-height:0;padding:14px;row-gap:12px}
+  .chat{min-height:0}
+  .chat-head{padding:8px 12px;gap:6px}
+  .chat-head .btn{padding:6px 10px;font-size:13.5px}
+  .log{padding:12px}
+  .quick{max-height:96px;overflow:auto;flex:none}
+  .reason{flex:none;padding-top:6px}
+  .compose{flex:none;padding:8px 10px}
+  .compose textarea{min-height:0}
+}
+@media (min-width:700px) and (max-width:1023px){
+  nav.tabs button{padding:6px 9px;font-size:14px}
+  nav.tabs button .ts{display:none}
+  .brand h1{font-size:20px}
+  .session{grid-template-columns:220px 1fr}
+  .side{grid-template-columns:72px 1fr}
+  .side .stage .av-tools{display:none}
+  .chart.key{font-size:14px;padding:8px 10px}
+  .chart.key dd.dx{font-size:15px}
+  .chat-head .title{width:100%}
+}
+/* 選病人畫面：左邊組病人、右邊已儲存的病人，各自在框內捲動 */
+.introbox{margin-bottom:14px}
+.introbox summary{cursor:pointer;font-weight:700;color:var(--sage);font-size:14.5px;padding:4px 0}
+.introbox[open] summary{margin-bottom:8px}
+#pickScreen{display:flex;flex-direction:column-reverse}
+@media (min-width:700px){
+  #pickScreen:not([hidden]){flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:12px}
+  .pick-main{grid-column:1;grid-row:1;min-height:0;overflow:auto;overscroll-behavior:contain}
+  .pick-side{grid-column:2;grid-row:1;min-height:0;overflow:auto;overscroll-behavior:contain;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+  .pick-side .section-h{flex-direction:column;gap:0;margin-bottom:8px}
+  .pick-side .section-h h2{font-size:16px}
+  .pick-side .section-h span{font-size:12px}
+  .pick-side .cases{grid-template-columns:1fr;gap:8px}
+  .pick-side .case{padding:10px 12px 22px;gap:3px}
+  .pick-side .case .avatar{width:34px;height:34px;font-size:16px}
+  .pick-side .case .name{font-size:15px}
+  .pick-side .case .dx{font-size:13.5px;line-height:1.4}
+  .pick-side .case>.meta{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;font-size:12.5px}
+  .pick-side .diff:empty{display:none}
+  .pick-side .del{bottom:2px;font-size:12px}
+  .pick-side .intro{grid-template-columns:1fr;gap:10px;margin:0}
+  .pick-side .intro>*{padding:12px;font-size:13px}
+  .pick-side .intro h2{font-size:14px}
+  .pick-side .introbox{margin:0 0 10px;border-bottom:1px dashed var(--line);padding-bottom:6px}
+  .composer{padding:14px 16px;margin-bottom:12px}
+  .composer>h2{display:none}
+  #cComposer>h2{display:block;font-size:17px}
+  .composer>p.muted{font-size:13px!important}
+  .composer .grid3{gap:8px 10px;margin-top:10px}
+  .composer label{font-size:13px;gap:2px}
+  .composer input,.composer select,.composer textarea{padding:6px 9px}
+  .composer textarea{min-height:40px;height:40px}
+  .composer .row{margin-top:10px}
+  #view-clinic #kPick:not([hidden]){flex:1;min-height:0;overflow:auto}
+}
+@media (min-width:700px) and (max-width:1023px){
+  #pickScreen:not([hidden]){grid-template-columns:minmax(0,1fr) 230px}
+  .composer .grid3{grid-template-columns:1fr 1fr}
+}
+@media (min-width:700px) and (max-height:620px){ .quick{max-height:64px} }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -362,6 +439,8 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
   <section class="view on" id="view-practice">
     <div class="vhead"><h2>醫病溝通</h2><p>怎麼說，病人才聽得懂、願意投入</p></div>
     <div id="pickScreen">
+      <div class="pick-side">
+      <details class="introbox"><summary>對話六步驟與評分原則</summary>
       <div class="intro">
         <div class="flow">
           <h2>一次好的治療說明，大致走這六步</h2>
@@ -380,6 +459,11 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
           <p>AI 教練會把「誇大療效、製造恐懼、不給選擇」列為扣分項。病人真的不適合震波時，推薦正確方案才是高分。</p>
         </div>
       </div>
+      </details>
+      <div class="section-h"><h2>已儲存的病人</h2><span>建好的病人會留在這台裝置，可以重複練習</span></div>
+      <div class="cases" id="cases"></div>
+      </div>
+      <div class="pick-main">
       <datalist id="dlAge"><option value="16"><option value="22"><option value="28"><option value="35"><option value="42"><option value="50"><option value="58"><option value="65"><option value="72"><option value="80"><option value="20多歲"><option value="40多歲"><option value="60多歲"></datalist>
       <datalist id="dlRegion"><option value="頸部"><option value="肩膀"><option value="手肘"><option value="手腕／手指"><option value="上背／胸椎"><option value="下背"><option value="骨盆／薦髂關節"><option value="髖部"><option value="膝蓋"><option value="小腿／阿基里斯腱"><option value="腳踝"><option value="足底／足部"><option value="頭痛／顳顎關節"><option value="中風後"><option value="膝關節置換術後"><option value="前十字韌帶重建術後"><option value="骨折術後"><option value="長者跌倒／平衡"><option value="產後骨盆"><option value="運動傷害"></datalist>
       <datalist id="dlJob"><option value="上班族（久坐電腦）"><option value="軟體工程師"><option value="餐飲業外場"><option value="廚師"><option value="計程車司機"><option value="外送員"><option value="建築工人"><option value="搬運工"><option value="護理師"><option value="美髮師"><option value="牙醫師"><option value="國小老師"><option value="業務"><option value="家庭主婦"><option value="照顧孫子的長輩"><option value="退休公務員"><option value="農夫"><option value="大學生"><option value="高中籃球校隊"><option value="馬拉松跑者"><option value="健身教練"><option value="瑜伽老師"><option value="音樂家"><option value="新手媽媽"></datalist>
@@ -413,8 +497,7 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
         </div>
       </div>
       <div class="preview builder" id="bPreview" hidden style="margin-bottom:22px"></div>
-      <div class="section-h"><h2>已儲存的病人</h2><span>建好的病人會留在這台裝置，可以重複練習</span></div>
-      <div class="cases" id="cases"></div>
+      </div>
     </div>
 
     <div id="sessionScreen" hidden>
@@ -615,7 +698,7 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
           <select id="setLevel">
             <option value="easy">溫和：顧慮少，容易被說服</option>
             <option value="normal">一般：真實門診的樣子</option>
-            <option value="hard">嚴格：多疑、在意價錢、會比價</option>
+            <option value="hard">偏難：多疑、在意價錢、會比價</option>
           </select>
         </label>
         <div><button class="btn primary" id="saveSet">儲存設定</button> <span class="muted" id="saveMsg"></span></div>
@@ -637,7 +720,7 @@ const CASES = [
    chief:"早上下床第一步最痛，下班後腳底像被撕開", diff:"一般",
    goal:"恢復能整天上班不用一直找地方坐；年底想跟女兒去日本自助旅行，怕走不了",
    concerns:["費用：覺得自費很貴，健保都做那麼久了","懷疑：做了那麼多次都沒好，是不是治不好了","時間：排班很難請假"],
-   fit:"震波適應症明確（慢性、保守治療 3 個月以上效果不佳），加上小腿與足底伸展、足弓肌力訓練、鞋墊建議",
+   fit:"震波適應症明確（慢性、保守治療 3 到 6 個月以上效果不佳），加上小腿與足底伸展、足弓肌力訓練、鞋墊建議",
    hook:"如果你講到日本旅行，她會明顯有興趣"},
   {id:"ct", name:"陳先生", init:"陳", age:55, job:"會計師事務所合夥人", dx:"右肩鈣化性肌腱炎（棘上肌，X 光鈣化約 1.5 公分）", dur:"5 個月",
    tried:"骨科打過一次類固醇，好了兩個月又痛；醫師提過如果不行可能要開刀清鈣化",
@@ -646,12 +729,12 @@ const CASES = [
    concerns:["怕痛：聽說震波很痛","要證據：會問有沒有研究、成功率多少","不想再打針"],
    fit:"震波對鈣化性肌腱炎有研究支持，可作為手術前的保守選項；搭配肩胛穩定與旋轉肌訓練",
    hook:"用數據與機轉說明他會比較信；講到『避免開刀』他很在意，但你不能保證"},
-  {id:"te", name:"王太太", init:"王", age:48, job:"家庭主婦，在家做手作皮件接單", dx:"右側網球肘（外上髁肌腱病變）", dur:"6 個月",
+  {id:"te", name:"王太太", init:"王", age:48, job:"家庭主婦，在家做手作皮件接單", dx:"右側網球肘（肱骨外上髁肌腱病變）", dur:"6 個月",
    tried:"戴護肘、貼布、偶爾熱敷；來過兩次健保復健",
    chief:"擰毛巾、拿鍋子、裁皮時手肘外側刺痛", diff:"偏難",
    goal:"想繼續接手作訂單賺零用錢，年底旺季怕做不了",
    concerns:["預算：家裡錢是先生在管，自費要回去商量","罪惡感：覺得花錢在自己身上很浪費","懷疑是不是休息就會好"],
-   fit:"可提震波，但也應提供運動治療（離心/等長訓練）與工作姿勢調整的選項，讓她有不同預算的方案",
+   fit:"可提震波，但也應提供運動治療（離心／等長訓練）與工作姿勢調整的選項，讓她有不同預算的方案",
    hook:"幫她準備『回家怎麼跟先生說』會大幅提升信任"},
   {id:"lb", name:"張先生", init:"張", age:35, job:"軟體工程師，久坐遠端工作", dx:"慢性非特異性下背痛", dur:"2 年反反覆覆",
    tried:"按摩、推拿、整脊、健保電療熱敷，當下舒服幾天又回來",
@@ -708,7 +791,7 @@ const LIB = {
     {t:"關心開場", aim:"讓病人放鬆，建立「你在乎我這個人」的感覺。", say:["最近這隻腳，對你上班影響大嗎？","今天來之前，有哪個動作特別卡？"], avoid:"一開口就問「要不要做震波」。"},
     {t:"探詢痛點", aim:"問出具體情境、時間與嚴重度，並記下病人的原話。", say:["最痛的是什麼時候？早上第一步、久站，還是休息後再走？","如果 0 分不痛、10 分最痛，現在大概幾分？","之前做過哪些治療？哪個有用、哪個沒用？"], avoid:"病人講到一半就打斷開始解釋。"},
     {t:"找出目標", aim:"把「不痛」轉成具體、有畫面的生活目標，這是病人願意投入的真正理由。", say:["如果這個問題解決了，你最想先去做什麼？","你希望多久以內看到改善？有什麼時間點嗎？"], avoid:"自己替病人設定目標。"},
-    {t:"衛教連結", aim:"用白話解釋問題，讓病人理解「為什麼之前沒好」，建立專業信任。", say:["你的筋膜是慢性發炎，組織已經有點「卡住」，一般熱敷電療比較像止痛，沒有處理到修復。","所以我們要做的，是讓組織重新啟動修復，同時把承受力練回來。"], avoid:"一堆專有名詞，或暗示之前的治療師做錯。"},
+    {t:"衛教連結", aim:"用白話解釋問題，讓病人理解「為什麼之前沒好」，建立專業信任。", say:["你的筋膜長期反覆受力，組織修復一直跟不上，有點「卡住」，一般熱敷電療比較像止痛，沒有處理到修復。","所以我們要做的，是讓組織重新啟動修復，同時把承受力練回來。"], avoid:"一堆專有名詞，或暗示之前的治療師做錯。"},
     {t:"提出選項", aim:"給兩到三個方案，說清楚差別、次數、總費用與病人要付出的時間。", say:["第一個選擇是繼續健保復健，加上回家的伸展；第二個是加上震波，每週一次約 4 次，總共大概是這個費用。","兩個都是正確的選擇，差別在速度和投入。你比較傾向哪一個？"], avoid:"只給一個自費選項，或把健保方案說得很沒用。"},
     {t:"處理顧慮並邀約", aim:"把異議當成資訊，回應後請病人做一個小決定（試做、排時間、回家討論）。", say:["聽起來你最擔心的是費用，還是效果？","要不要先排第一次，做完我們一起看反應，再決定後面要不要繼續？"], avoid:"「今天不做名額就沒了」這類製造壓力的說法。"}
   ]},
@@ -723,14 +806,14 @@ const LIB = {
 const MODS = [
   {g:"儀器治療",n:"熱療（熱敷、紅外線）",fit:"肌肉緊繃、慢性下背痛、關節僵硬",say:"熱會讓這邊的血流變多，緊的肌肉比較容易放鬆，等一下做運動會更好動。",note:"說明它是「準備」，不是根治，避免病人以為熱敷就夠。"},
   {g:"儀器治療",n:"冰療",fit:"急性扭傷、拉傷早期、術後腫脹",say:"剛受傷這幾天組織在發炎腫脹，冰敷可以讓血管收縮、消腫止痛。",note:"說清楚使用時機與時間，一次約 10 到 15 分鐘。"},
-  {g:"儀器治療",n:"電療（TENS）",fit:"急慢性疼痛、坐骨神經痛、肌肉無力",say:"這個電流會干擾痛覺往大腦傳，讓你比較不痛，我們才能把該練的動作練起來。",note:"定位為止痛輔助，引導病人期待後續的主動運動。"},
-  {g:"儀器治療",n:"超音波",fit:"媽媽手、網球肘、韌帶損傷",say:"超音波是很細的震動，打到比較深的組織，有點像從裡面按摩，幫助組織修復。",note:""},
-  {g:"儀器治療",n:"牽引",fit:"頸椎病、腰椎間盤突出、坐骨神經痛",say:"牽引是把脊椎之間輕輕拉開一點空間，讓被壓到的神經比較舒服。",note:"說明拉的力量會慢慢調，有不舒服要馬上說。"},
-  {g:"儀器治療",n:"體外震波",self:true,fit:"慢性足底筋膜炎、鈣化性肌腱炎、慢性肌腱病變",say:"震波是用很強的聲波打在慢性發炎的地方，讓組織以為又受傷了，重新啟動修復，同時刺激新的血管長出來。對拖很久、一般復健效果有限的肌腱問題特別有意義。",note:"要主動說明：自費、常見 3 到 5 次、會有痠痛感、不保證療效、懷孕與凝血異常等禁忌。"},
+  {g:"儀器治療",n:"電療（TENS）",fit:"急慢性疼痛、坐骨神經痛",say:"這個電流會干擾痛覺往大腦傳，讓你比較不痛，我們才能把該練的動作練起來。",note:"定位為止痛輔助，引導病人期待後續的主動運動。"},
+  {g:"儀器治療",n:"超音波",fit:"媽媽手、韌帶損傷（輔助）",say:"超音波是很細的震動，打到比較深的組織，有點像從裡面按摩，可以當作輔助。",note:"多數指引認為單獨使用的證據有限，不要當成主要治療，也不要說成能修復組織。"},
+  {g:"儀器治療",n:"牽引",fit:"頸椎神經根病變、腰椎椎間盤突出、坐骨神經痛",say:"牽引是把脊椎之間輕輕拉開一點空間，讓被壓到的神經比較舒服。",note:"說明拉的力量會慢慢調，有不舒服要馬上說。"},
+  {g:"儀器治療",n:"體外震波",self:true,fit:"慢性足底筋膜炎、鈣化性肌腱炎、慢性肌腱病變",say:"震波是用很強的聲波打在長期修復不良的組織，讓組織以為又受傷了，重新啟動修復，同時刺激新的血管長出來。對拖很久、一般復健效果有限的肌腱問題特別有意義。",note:"要主動說明：自費、常見 3 到 5 次、會有痠痛感、不保證療效、懷孕與凝血異常等禁忌。"},
   {g:"徒手治療",n:"關節鬆動術",self:true,fit:"五十肩、關節活動度受限",say:"你的關節像生鏽的門軸，我用手在關節上做小幅度的滑動，讓它恢復原本該有的滑動。",note:""},
   {g:"徒手治療",n:"筋膜放鬆",self:true,fit:"激痛點、肌肉沾黏",say:"這裡有一個很緊的結，會牽到別的地方痛。我幫你把它鬆開，你再練習才會用對肌肉。",note:""},
   {g:"徒手治療",n:"神經鬆動術",self:true,fit:"手麻、腳麻、神經卡壓",say:"神經在身體裡是會滑動的，被卡住就會麻。我們用特定角度讓它重新滑順。",note:""},
-  {g:"運動治療",n:"核心與穩定性訓練",self:true,fit:"慢性下背痛、姿勢問題",say:"深層的核心像天然護腰，把它練起來，脊椎自己就有支撐，這是不容易再復發的關鍵。",note:"用「不用一直回來按摩」這種病人自己的目標連結。"},
+  {g:"運動治療",n:"核心與穩定性訓練",self:true,fit:"慢性下背痛、姿勢問題",say:"深層的核心像天然護腰，把它練起來，脊椎自己就有支撐，這是降低復發的關鍵之一。",note:"用「不用一直回來按摩」這種病人自己的目標連結。"},
   {g:"運動治療",n:"肌力與耐力訓練",self:true,fit:"肌肉萎縮、退化性關節炎、術後",say:"大腿肌肉就像膝蓋的避震器，肌肉有力，關節受的衝擊就變小。",note:""},
   {g:"運動治療",n:"本體覺與平衡訓練",self:true,fit:"腳踝反覆扭傷、長者防跌",say:"這是在練神經的反應速度，讓關節快歪的時候，肌肉來得及把你救回來。",note:""},
   {g:"特殊領域",n:"心肺、神經、小兒物理治療",fit:"心臟術後、COPD、中風、巴金森、發展遲緩",say:"這類訓練重點是讓日常能力一步一步回來，我們會一起設定每個月可以達成的小目標。",note:"這類族群重點在家屬溝通與長期目標，不適合用促銷式說法。"}
@@ -958,7 +1041,7 @@ function openerFor(c){
     pf:"（坐下來揉著腳跟）老師，我這個腳還是一樣欸，早上起來還是痛得要命。是不是就這樣了，好不了了？",
     ct:"你好。我是骨科那邊轉過來的，醫生說我肩膀有鈣化。老實說我最近晚上都睡不好。",
     te:"不好意思又來麻煩你，其實我覺得可能休息一下就會好了啦，只是最近訂單比較多……",
-    lb:"嗨，我腰痛好幾年了，按摩完都只好幾天。對了，我在網路上看到一種叫震波的，我可以做嗎？",
+    lb:"嗨，我腰痛好幾年了，按摩完都只舒服幾天。對了，我在網路上看到一種叫震波的，我可以做嗎？",
     ko:"唉，老了啦，膝蓋就是這樣。我女兒一直叫我來，我是覺得健保做做熱敷就好了。",
     jk:"教練，喔不是，老師，我膝蓋還要多久才會好？我下個月底有比賽。"
   })[c.id] || c.chief;
@@ -1082,7 +1165,7 @@ ${priceText()}
 2. 治療師若只是推銷、講一堆專有名詞、打斷你、沒問你的感受，你就變得冷淡或防備，信任下降。
 3. 治療師若真誠關心、問出你的目標、白話解釋、清楚講費用與次數、給你選擇、尊重你的決定，信任上升。
 4. 治療師若保證療效、恐嚇、或貶低健保與其他醫療人員，你會起疑，信任明顯下降。
-5. 如果治療師推薦的方案不適合你的狀況，你可以先相信，但這不算加分。
+5. 如果治療師推薦的方案不適合你的狀況，你可以先半信半疑地聽，但不要因此提高對治療師的信任。
 6. 信任夠高（約 75 以上）而且費用與次數都講清楚時，你可以決定「接受」自費方案，或決定「回家討論後再說」；信任低時會婉拒。決定要符合你的角色。
 7. 不要跳出角色，不要評論治療師的技巧。
 
@@ -1387,7 +1470,7 @@ const KW={
   traction:["牽引","traction"],
   edu:["衛教","疼痛科學","說明病情","教育"],
   orth:["鞋墊","矯具","足弓墊","orthos"],
-  brace:["護具","護套","護膝","支架","brace"],
+  brace:["護具","護套","護膝","支架","加壓帶","護帶","brace"],
   heat:["熱敷","熱療","紅外線","冰敷","冰療"],
   inject:["類固醇","注射","打針"]
 };
@@ -1443,7 +1526,7 @@ const EVID=[
    {tx:"雷射",k:KW.laser,g:"C",d:"可考慮"},
    {tx:"TENS",k:["TENS","電療","電刺激"],g:"C",d:"可考慮",note:"短期止痛"},
    {tx:"離子導入（早期高激惹）",k:KW.ionto,g:"C",d:"可考慮"},
-   {tx:"反作用力護套",k:KW.brace,g:"F",d:"可考慮（活動時）",note:"中長期效果證據矛盾（D）"},
+   {tx:"網球肘加壓帶（反作用力護帶）",k:KW.brace,g:"F",d:"可考慮（活動時）",note:"中長期效果證據矛盾（D）"},
    {tx:"超音波（單獨使用）",k:KW.us,g:"D",d:"證據矛盾"},
    {tx:"衛教與人體工學",k:KW.edu,g:"E",d:"可考慮"},
    {tx:"體外震波",k:KW.eswt,g:"—",d:"本指引未納入",note:"保險給付政策將「保守治療 6 個月無效的慢性外上髁炎」列為震波適應症。"}]},
@@ -1511,7 +1594,7 @@ const K_ASK={
 const K_TESTS={
   "頸椎":["頸椎主動 ROM","Spurling test","Distraction test","ULTT 上肢神經張力測試","深層頸屈肌耐力測試","頸椎附屬動作 PAIVM"],
   "肩":["肩關節主動／被動 ROM","Neer test","Hawkins-Kennedy test","Empty can test","Drop arm test","External rotation lag sign","Speed's test","O'Brien test","Apprehension / Relocation test","被動外轉受限（關節囊型態）","肩胛動態評估"],
-  "肘腕手":["Cozen test","Mill's test","Maudsley test","Finkelstein test","Phalen test","Tinel sign","握力測試"],
+  "肘腕手":["Cozen test","Mills test","Maudsley test","Finkelstein test","Phalen test","Tinel sign","握力測試"],
   "胸腰椎骨盆":["腰椎 ROM 與重複動作（McKenzie）","SLR 直膝抬腿","Slump test","Prone instability test","腰椎 PA 附屬動作","薦髂關節激發測試群組","L2–S1 神經學檢查"],
   "髖":["髖關節 ROM","FADIR test","FABER test","Thomas test","Trendelenburg sign","單腳站立／單腳蹲"],
   "膝":["膝關節 ROM 與積水測試","Lachman test","前／後抽屜測試","McMurray test","Thessaly test","內外翻壓力測試","Patellar grind (Clarke)","髕骨活動度","Ober test","單腳蹲品質"],
@@ -1523,7 +1606,7 @@ const K_MEASURE=["NPRS 疼痛分數","PSFS 病人特定功能量表","ODI 下背
 const K_EDU=["疼痛科學衛教","活動調整與負荷管理","居家運動處方（組數／次數／頻率）","姿勢與人體工學建議","睡姿建議","回歸工作／運動的漸進計畫","護具、貼紮或鞋墊建議","自費與健保方案說明"];
 const K_REFER=["轉介骨科評估","轉介復健科醫師","轉介神經內科","建議影像檢查","建議回診原主治醫師","緊急就醫"];
 const K_TOOLS={
-  "理學檢查":["觸診","關節活動度 ROM","徒手肌力測試 MMT","特殊測試（請寫測試名稱）","神經學檢查（感覺/反射/肌力）","姿勢與步態評估","功能性動作測試","查看影像或報告"],
+  "理學檢查":["觸診","關節活動度 ROM","徒手肌力測試 MMT","特殊測試（請寫測試名稱）","神經學檢查（感覺／反射／肌力）","姿勢與步態評估","功能性動作測試","查看影像或報告"],
   "儀器治療":["熱療","冰療","電療 TENS","超音波","牽引","體外震波"],
   "徒手治療":["關節鬆動術","關節操作術","筋膜放鬆","激痛點治療","神經鬆動術","軟組織按摩","肌肉能量技術 MET"],
   "運動治療":["核心穩定訓練","肌力訓練","離心訓練","等長收縮止痛","伸展","神經肌肉控制訓練","本體覺平衡訓練","增強式訓練","有氧耐力","功能性與專項動作訓練"],
@@ -1821,9 +1904,9 @@ const COND_SCRIPTS={
   heel:{explain:"足底筋膜是從腳跟連到腳趾、撐住足弓的一條組織。久站或小腿太緊時，它在腳跟的附著處會反覆受力，所以早上下床第一步特別痛。",
     plan:"研究最支持的是伸展足底和小腿、徒手放鬆，再加上貼紮；早上第一步很痛的話，可以用一到三個月的夜間副木。我們先從這些開始，回家每天做十分鐘伸展。",
     self:"如果已經拖了半年以上、這些方法效果有限，可以和醫師討論體外震波，它是慢性足底筋膜炎常見的選項之一，但不是第一線，也要先確認沒有懷孕、凝血異常等禁忌。"},
-  elbow:{explain:"網球肘是前臂伸肌在手肘外側的肌腱，反覆用力後修復跟不上磨損，所以擰毛巾、提重物時會痛。",
+  elbow:{explain:"網球肘是手肘外側的前臂伸肌肌腱，反覆用力後修復跟不上負荷，所以擰毛巾、提重物時會痛。",
     plan:"研究支持的是腕部伸肌的漸進阻力訓練，加上手肘關節鬆動；痛得很厲害的時候，可以先用貼紮或護套撐過工作。",
-    self:"拖很久的慢性網球肘，震波是常見的選項之一，但最重要的還是把肌腱的承受力練回來，這部分一對一運動課程會比較有效率。"},
+    self:"拖了半年以上的慢性網球肘，可以和醫師討論震波（臨床指引尚未納入，屬於個別選擇），但最重要的還是把肌腱的承受力練回來，這部分一對一運動課程會比較有效率。"},
   lbp:{explain:"大部分的下背痛不是結構壞掉，而是肌肉、關節和神經系統對負荷變得敏感。愈怕動，通常恢復得愈慢。",
     plan:"實證最支持的是運動治療和關節鬆動，再加上疼痛科學衛教。我們會先找出你能舒服做的動作，再慢慢加量。",
     self:"腰痛不建議做震波；長期合併腳麻的腰痛，指引也不建議用機械牽引。如果要自費，比較值得投資的是一對一運動課程。"},
@@ -1839,7 +1922,7 @@ const COND_SCRIPTS={
   frozen:{explain:"五十肩是肩關節囊發炎、變厚、變緊，通常會經歷疼痛期、僵硬期和解凍期，大約一到兩年慢慢恢復。",
     plan:"實證較強的是衛教和伸展運動；疼痛期由醫師注射類固醇的證據最強，需要時我會建議你回診評估。關節鬆動可以搭配，但證據較弱。",
     self:"五十肩不是震波的建議適應症。如果要自費，一對一的伸展與運動指導比較合適。"},
-  knee:{explain:"膝退化是關節軟骨和周邊組織慢慢磨損。大腿肌肉就像避震器，肌力愈好，膝蓋受的衝擊就愈小。",
+  knee:{explain:"膝退化是關節軟骨和周邊組織慢慢退化、承受力下降，不代表不能動。大腿肌肉就像避震器，肌力愈好，膝蓋受的衝擊就愈小。",
     plan:"最強烈建議的是運動和體重控制，必要時加上護膝。我們會設計你在家也能做的肌力訓練。",
     self:"指引強烈不建議用電療（TENS）處理膝退化，震波也不是建議項目；如果要自費，建議投資在一對一運動課程。"}
 };
@@ -2074,7 +2157,7 @@ $("#goSet").addEventListener("click",()=>document.querySelector('nav.tabs button
 
 $("#saveSet").addEventListener("click",()=>{
   SET={sw:+$("#setSW").value||DEF.sw, swn:$("#setSWn").value.trim()||DEF.swn, ex:+$("#setEx").value||DEF.ex, mt:+$("#setMT").value||DEF.mt, level:$("#setLevel").value};
-  saveSet(); $("#saveMsg").textContent="已儲存，下一次演練開始生效。";
+  saveSet(); $("#saveMsg").textContent="已儲存，下一次演練開始時生效。";
   setTimeout(()=>$("#saveMsg").textContent="",2500);
 });
 
