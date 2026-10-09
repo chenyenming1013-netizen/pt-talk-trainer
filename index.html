@@ -111,6 +111,23 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
 .msg .say-btn:hover{opacity:1}
 .voice-toggle[aria-pressed="true"]{background:var(--sage-soft);border-color:var(--sage)}
 @media (prefers-reduced-motion:reduce){.mic.on{animation:none}}
+.composer{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px 22px;margin-bottom:22px}
+.composer h2{margin:0 0 4px;font-size:19px}
+.composer .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+.composer label{display:grid;gap:4px;font-size:14px;color:var(--ink-2)}
+.composer input,.composer select,.composer textarea{font:inherit;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%}
+.composer textarea{min-height:60px;resize:vertical}
+.composer .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.composer .note{background:var(--amber-soft);border-radius:10px;padding:8px 12px;font-size:13.5px;margin-top:10px}
+@media (max-width:860px){.composer .grid3{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.composer .grid3{grid-template-columns:1fr}}
+.tools details{border:1px solid var(--line);border-radius:10px;padding:6px 10px}
+.tools summary{cursor:pointer;font-size:13.5px;font-weight:700}
+.tools details[open] summary{margin-bottom:6px}
+.tools select{font:inherit;font-size:13px;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:4px 6px;margin-bottom:6px;width:100%}
+.chips button.flag{border-color:var(--rose)}
+.reason{display:flex;gap:8px;align-items:center;padding:8px 12px 0;flex-wrap:wrap}
+.reason select{font:inherit;font-size:13.5px;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:6px 8px;flex:1;min-width:180px}
 .section-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 12px}
 .section-h h2{margin:0;font-size:19px}
 .section-h span{color:var(--ink-2);font-size:13.5px}
@@ -293,44 +310,41 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
           <p>AI 教練會把「誇大療效、製造恐懼、不給選擇」列為扣分項。病人真的不適合震波時，推薦正確方案才是高分。</p>
         </div>
       </div>
-      <div class="section-h"><h2>選一位病人開始</h2><span>每位病人都有沒說出口的顧慮，要靠你問出來</span></div>
-      <div class="cases" id="cases"></div>
-    </div>
-
-    <div id="builderScreen" hidden>
-      <div class="builder">
-        <h2>新增病人案例</h2>
-        <p class="muted" style="margin:0 0 14px;font-size:14.5px">用幾句話描述病人背景，AI 會補齊個性、生活目標、沒說出口的顧慮和開場白。產生後每一欄都可以再修改。</p>
-        <label>病人背景
-          <textarea id="bInput" placeholder="例如：50 歲男性計程車司機，右肩五十肩 4 個月，晚上會痛醒，覺得年紀到了就會這樣，很在意要停工賺不到錢。"></textarea>
-        </label>
-        <div class="examples" id="bExamples"></div>
-        <div class="grid2" style="margin-top:12px">
-          <label>希望練習的重點
-            <select id="bFocus">
-              <option value="">讓 AI 依病情判斷最適合的方案</option>
+      <datalist id="dlAge"><option value="16"><option value="22"><option value="28"><option value="35"><option value="42"><option value="50"><option value="58"><option value="65"><option value="72"><option value="80"><option value="20多歲"><option value="40多歲"><option value="60多歲"></datalist>
+      <datalist id="dlRegion"><option value="頸部"><option value="肩膀"><option value="手肘"><option value="手腕／手指"><option value="上背／胸椎"><option value="下背"><option value="骨盆／薦髂關節"><option value="髖部"><option value="膝蓋"><option value="小腿／阿基里斯腱"><option value="腳踝"><option value="足底／足部"><option value="頭痛／顳顎關節"><option value="中風後"><option value="膝關節置換術後"><option value="前十字韌帶重建術後"><option value="骨折術後"><option value="長者跌倒／平衡"><option value="產後骨盆"><option value="運動傷害"></datalist>
+      <datalist id="dlJob"><option value="上班族（久坐電腦）"><option value="軟體工程師"><option value="餐飲業外場"><option value="廚師"><option value="計程車司機"><option value="外送員"><option value="建築工人"><option value="搬運工"><option value="護理師"><option value="美髮師"><option value="牙醫師"><option value="國小老師"><option value="業務"><option value="家庭主婦"><option value="照顧孫子的長輩"><option value="退休公務員"><option value="農夫"><option value="大學生"><option value="高中籃球校隊"><option value="馬拉松跑者"><option value="健身教練"><option value="瑜伽老師"><option value="音樂家"><option value="新手媽媽"></datalist>
+      <datalist id="dlPers"><option value="多疑、愛比價"><option value="焦慮、很怕痛"><option value="急性子、只想要速效"><option value="健談、愛抱怨"><option value="沉默寡言、問一句答一句"><option value="很會上網查資料、會質疑"><option value="配合度高、很信任專業"><option value="好面子、不想承認自己老了"><option value="凡事要問家人才能決定"><option value="怕麻煩、不想做運動"><option value="完美主義、問題很多"><option value="悲觀、覺得治不好"><option value="客氣、不好意思拒絕"><option value="脾氣急、容易不耐煩"></datalist>
+      <div class="composer" id="cComposer">
+        <h2>組一位病人</h2>
+        <p class="muted" style="margin:0;font-size:14.5px">每一欄都可以自由輸入，或從建議中挑選；留空就由 AI 隨機決定。AI 會把這些條件組成一個合理的人設，條件互相矛盾時會微調並告訴你。</p>
+        <div class="grid3">
+          <label>年齡<input id="cAge" list="dlAge" placeholder="隨機"></label>
+          <label>性別<select id="cGender"><option value="">隨機</option><option>男</option><option>女</option></select></label>
+          <label>受傷部位／問題<input id="cRegion" list="dlRegion" placeholder="隨機"></label>
+          <label>職業<input id="cJob" list="dlJob" placeholder="隨機"></label>
+          <label>個性<input id="cPers" list="dlPers" placeholder="隨機"></label>
+          <label>病程<select id="cCourse"><option value="">隨機</option><option>急性（2 週內）</option><option>亞急性（2 到 12 週）</option><option>慢性（3 個月以上）</option><option>反覆發作</option><option>術後復健</option></select></label>
+          <label>經濟狀況<select id="cBudget"><option value="">隨機</option><option>寬裕，願意投資健康</option><option>普通，會比較價格</option><option>拮据，希望健保就好</option><option>由家人出錢</option></select></label>
+          <label>練習重點<select id="cFocus">
+              <option value="">讓 AI 依病情判斷</option>
               <option value="體外震波">說明體外震波</option>
               <option value="徒手治療">說明自費徒手治療</option>
-              <option value="一對一運動治療課程">說明一對一運動治療課程</option>
-              <option value="誠實判斷：這位病人不適合自費，練習好好照顧健保病人">不適合自費的病人（練誠信）</option>
-            </select>
-          </label>
-          <label>病人難度
-            <select id="bDiff">
-              <option value="溫和">溫和</option>
-              <option value="一般" selected>一般</option>
-              <option value="偏難">偏難</option>
-            </select>
-          </label>
+              <option value="一對一運動治療課程">說明一對一運動課程</option>
+              <option value="誠實判斷：這位病人不適合自費，練習好好照顧健保病人">不適合自費（練誠信）</option>
+            </select></label>
+          <label>難度<select id="cDiff"><option>溫和</option><option selected>一般</option><option>偏難</option></select></label>
         </div>
+        <label style="margin-top:12px">其他補充（選填）<textarea id="cMore" placeholder="例如：女兒陪同、下個月要出國、之前在別家做過震波沒效、很怕痛……"></textarea></label>
         <div class="row">
-          <button class="btn primary" id="bBuild">用 AI 建構人格</button>
-          <button class="btn" id="bRandom">隨機產生一位</button>
-          <button class="btn" id="bCancel">取消</button>
-          <span class="muted" id="bMsg"></span>
+          <button class="btn primary" type="button" id="cBuild">用 AI 建構人設</button><button class="btn" type="button" id="cQuick">直接開始</button>
+          <button class="btn" type="button" data-dice="c">🎲 全部隨機填入</button>
+          <button class="btn" type="button" data-clear="c">清除</button>
+          <span class="muted" id="cMsg"></span>
         </div>
-        <div class="preview" id="bPreview" hidden></div>
       </div>
+      <div class="preview builder" id="bPreview" hidden style="margin-bottom:22px"></div>
+      <div class="section-h"><h2>已儲存的病人</h2><span>建好的病人會留在這台裝置，可以重複練習</span></div>
+      <div class="cases" id="cases"></div>
     </div>
 
     <div id="sessionScreen" hidden>
@@ -340,7 +354,16 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
           <div class="chat-head">
             <span class="title" id="chatTitle">演練中</span>
             <button class="btn voice-toggle" data-voice-toggle aria-pressed="false" title="病人用聲音回答">🔈 病人語音</button>
-            <button class="btn warn" id="hintBtn">給我一句提示</button>
+            <select id="hintType" aria-label="提示類型" style="font:inherit;font-size:13.5px;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:6px 8px">
+              <option value="判斷我現在在哪一步，下一步最該做什麼">下一步該說什麼</option>
+              <option value="怎麼用開放式問題問出病人真正的生活目標與沒說出口的顧慮">怎麼問出需求</option>
+              <option value="怎麼用白話衛教解釋他的問題、為什麼之前的方法不夠">怎麼白話衛教</option>
+              <option value="怎麼並列兩到三個方案，清楚說明差別、次數與總費用">怎麼報價與給選項</option>
+              <option value="病人目前最可能的顧慮是什麼，怎麼回應">怎麼回應顧慮</option>
+              <option value="怎麼請病人做一個小決定（試做、排時間、回家討論），不施壓">怎麼邀約不施壓</option>
+              <option value="我剛剛說的話有沒有倫理或法規風險（保證療效、恐嚇、貶低他人）">檢查我的說法</option>
+            </select>
+            <button class="btn warn" id="hintBtn">給我提示</button>
             <button class="btn primary" id="endBtn">結束並評分</button>
             <button class="btn" id="quitBtn">換病人</button>
           </div>
@@ -359,22 +382,32 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
 
   <!-- ============ CLINIC ============ -->
   <section class="view" id="view-clinic">
-    <div id="kPick" class="clinic-pick">
-      <h2 style="margin:0 0 4px;font-size:20px">臨床模擬：從初診到痊癒</h2>
-      <p class="muted" style="margin:0 0 16px;font-size:14.5px">AI 扮演病人和病人的身體。你負責問診、做理學檢查、下診斷、安排治療與居家運動，每次回診看病人的疼痛和功能變化，直到病人痊癒。真正的診斷一開始是隱藏的，要靠你自己判斷。</p>
-      <label>病人來源
-        <select id="kSource"></select>
-      </label>
-      <label>難度
-        <select id="kLevel">
-          <option value="入門：典型表現、病史清楚，病人配合度高">入門：典型表現</option>
-          <option value="一般：真實門診，有少量干擾資訊，偶爾忘記做居家運動" selected>一般：真實門診</option>
-          <option value="進階：非典型表現、可能合併其他問題或隱藏紅旗徵象，配合度不穩定">進階：非典型、可能有紅旗</option>
-        </select>
-      </label>
-      <div class="row" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <button class="btn primary" id="kStart">開始看診</button>
-        <span class="muted" id="kStartMsg"></span>
+    <div id="kPick">
+      <div class="composer" id="kComposer">
+        <h2>臨床模擬：從初診到痊癒</h2>
+        <p class="muted" style="margin:0;font-size:14.5px">AI 扮演病人和病人的身體。你負責問診、做理學檢查、下診斷、安排治療與居家運動，每次回診看疼痛和功能的變化，直到痊癒。條件可以自由搭配，留空就隨機；真正的診斷會隱藏起來，要靠你自己推理。</p>
+        <div class="grid3">
+          <label>年齡<input id="kAge" list="dlAge" placeholder="隨機"></label>
+          <label>性別<select id="kGender"><option value="">隨機</option><option>男</option><option>女</option></select></label>
+          <label>受傷部位／問題<input id="kRegion" list="dlRegion" placeholder="隨機"></label>
+          <label>職業<input id="kJob" list="dlJob" placeholder="隨機"></label>
+          <label>個性<input id="kPers" list="dlPers" placeholder="隨機"></label>
+          <label>病程<select id="kCourse"><option value="">隨機</option><option>急性（2 週內）</option><option>亞急性（2 到 12 週）</option><option>慢性（3 個月以上）</option><option>反覆發作</option><option>術後復健</option></select></label>
+          <label>經濟狀況<select id="kBudget"><option value="">隨機</option><option>寬裕，願意投資健康</option><option>普通，會比較價格</option><option>拮据，希望健保就好</option><option>由家人出錢</option></select></label>
+          <label>臨床難度<select id="kLevel">
+              <option value="入門：典型表現、病史清楚，病人配合度高">入門：典型表現</option>
+              <option value="一般：真實門診，有少量干擾資訊，偶爾忘記做居家運動" selected>一般：真實門診</option>
+              <option value="進階：非典型表現、可能合併其他問題或隱藏紅旗徵象，配合度不穩定">進階：非典型、可能有紅旗</option>
+            </select></label>
+          <label>或使用已儲存的病人<select id="kSource"></select></label>
+        </div>
+        <label style="margin-top:12px">其他補充（選填）<textarea id="kMore" placeholder="例如：女兒陪同、下個月要出國、之前在別家做過震波沒效、很怕痛……"></textarea></label>
+        <div class="row">
+          <button class="btn primary" type="button" id="kStart">開始看診</button>
+          <button class="btn" type="button" data-dice="k">🎲 全部隨機填入</button>
+          <button class="btn" type="button" data-clear="k">清除</button>
+          <span class="muted" id="kMsg"></span>
+        </div>
       </div>
     </div>
 
@@ -390,6 +423,20 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
             <button class="btn" id="kQuit">離開</button>
           </div>
           <div class="log" id="kLog" aria-live="polite"></div>
+          <div class="reason">
+            <span class="muted" style="font-size:13.5px">臨床推理提示</span>
+            <select id="kHintType" aria-label="臨床推理提示類型">
+              <option value="依目前已知的資訊，下一步最該問或最該檢查的是什麼">下一步該問／該查什麼</option>
+              <option value="依目前已知的資訊，列出 2 到 4 個鑑別診斷，各自需要什麼證據支持或排除">鑑別診斷有哪些</option>
+              <option value="解讀目前得到的檢查結果代表什麼意義，敏感度或特異度高低的含意">檢查結果怎麼解讀</option>
+              <option value="檢查我是否漏掉紅旗篩檢或需要轉介的狀況">有沒有漏掉紅旗</option>
+              <option value="依目前的工作診斷，建議治療計畫的階段目標與運動劑量（組數、次數、頻率、強度）">治療計畫與劑量</option>
+              <option value="依病人目前狀況，療程該如何進階或調整，何時可以回歸工作或運動">療程該怎麼進階</option>
+              <option value="這次衛教該怎麼用白話跟病人說，包含疼痛科學與負荷管理">衛教怎麼說</option>
+              <option value="建議適合追蹤這位病人進展的評估量表與功能測試">該用哪些評估量表</option>
+            </select>
+            <button class="btn warn" id="kHint">給我提示</button>
+          </div>
           <div class="compose">
             <select id="kType" aria-label="處置類型">
               <option>問診</option><option>理學檢查</option><option>診斷</option><option>治療</option><option>居家運動</option><option>衛教說明</option><option>轉介</option>
@@ -473,7 +520,9 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
       <div class="form">
         <label style="display:flex;gap:8px;align-items:center;color:var(--ink)"><input type="checkbox" id="vTTS" style="width:auto"> 病人用聲音回答</label>
         <label style="display:flex;gap:8px;align-items:center;color:var(--ink)"><input type="checkbox" id="vAuto" style="width:auto"> 講完一段話後自動送出（不勾就會先停在輸入框讓你檢查）</label>
-        <label>病人的聲音<select id="vVoice"></select></label>
+        <label>女性病人的聲音<select id="vVoiceF"></select></label>
+        <label>男性病人的聲音<select id="vVoiceM"></select></label>
+        <p class="muted" style="font-size:13px;margin:0">聲音最自然的是 <b>Microsoft Edge</b> 內建的「曉臻 HsiaoChen」「雲哲 YunJhe」等 Natural 語音；Chrome 請選「Google 國語（臺灣）」。標示「推薦」的是比較自然的聲音。</p>
         <label>語速 <input type="range" id="vRate" min="0.7" max="1.4" step="0.05"></label>
         <div><button class="btn" id="vTest">試聽</button> <span class="muted" id="vMsg"></span></div>
       </div>
@@ -779,7 +828,7 @@ document.querySelectorAll("nav.tabs button").forEach(b=>b.addEventListener("clic
 let CUSTOM=[];
 try{ const c=JSON.parse(localStorage.getItem("ptt-cases")||"null"); if(Array.isArray(c)) CUSTOM=c; }catch(e){}
 function saveCustom(){ try{localStorage.setItem("ptt-cases",JSON.stringify(CUSTOM));}catch(e){} }
-const allCases=()=>[...CASES,...CUSTOM];
+const allCases=()=>[...CUSTOM];
 function caseCard(c,own){
   return `<div class="case-wrap"><button class="case" data-id="${esc(c.id)}">
       <span class="who"><span class="avatar">${esc(c.init||String(c.name||"?").slice(0,1))}</span>
@@ -790,15 +839,13 @@ function caseCard(c,own){
     </button>${own?`<button class="del" data-del="${esc(c.id)}" aria-label="刪除${esc(c.name)}">刪除</button>`:''}</div>`;
 }
 function renderCases(){
-  $("#cases").innerHTML = CASES.map(c=>caseCard(c,false)).join("") + CUSTOM.map(c=>caseCard(c,true)).join("") +
-    `<button class="case add" id="addCase">＋ 新增病人案例<small>描述背景，讓 AI 建構人格</small></button>`;
+  $("#cases").innerHTML = CUSTOM.length ? CUSTOM.map(c=>caseCard(c,true)).join("") : `<p class="muted" style="grid-column:1/-1;margin:0">還沒有儲存的病人。在上方組一位病人，按「用 AI 建構人設」後就能儲存。</p>`;
   document.querySelectorAll(".case[data-id]").forEach(el=>el.addEventListener("click",()=>startSession(el.dataset.id)));
   document.querySelectorAll("[data-del]").forEach(el=>el.addEventListener("click",e=>{
     e.stopPropagation();
     const c=CUSTOM.find(x=>x.id===el.dataset.del);
     if(c && confirm(`確定刪除「${c.name}」這個案例？`)){ CUSTOM=CUSTOM.filter(x=>x.id!==c.id); saveCustom(); renderCases(); }
   }));
-  $("#addCase").addEventListener("click",openBuilder);
 }
 renderCases();
 
@@ -822,13 +869,14 @@ function startSession(id){
 function openerFor(c){
   if(c.opener) return c.opener;
   return ({
+    _:"",
     pf:"（坐下來揉著腳跟）老師，我這個腳還是一樣欸，早上起來還是痛得要命。是不是就這樣了，好不了了？",
     ct:"你好。我是骨科那邊轉過來的，醫生說我肩膀有鈣化。老實說我最近晚上都睡不好。",
     te:"不好意思又來麻煩你，其實我覺得可能休息一下就會好了啦，只是最近訂單比較多……",
     lb:"嗨，我腰痛好幾年了，按摩完都只好幾天。對了，我在網路上看到一種叫震波的，我可以做嗎？",
     ko:"唉，老了啦，膝蓋就是這樣。我女兒一直叫我來，我是覺得健保做做熱敷就好了。",
     jk:"教練，喔不是，老師，我膝蓋還要多久才會好？我下個月底有比賽。"
-  })[c.id];
+  })[c.id] || c.chief;
 }
 function renderSide(){
   const c=S.c;
@@ -856,7 +904,7 @@ function renderQuick(){
   $("#quick").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{ $("#input").value=b.textContent; $("#input").focus(); }));
 }
 function addMsg(kind, text, act){
-  if(kind==="pt") return voiceMsg($("#log"), text, S&&S.c&&S.c.name);
+  if(kind==="pt") return voiceMsg($("#log"), text, S&&S.c);
   const d=document.createElement("div");
   d.className="msg "+kind;
   if(act){ const a=document.createElement("span"); a.className="act"; a.textContent=act; d.appendChild(a); }
@@ -960,10 +1008,11 @@ ${priceText()}
 對話：
 ${transcript()}
 
-請判斷治療師現在處於哪一步、下一步最該做什麼，並給一句他可以直接說出口的台灣口語句子。遵守倫理：不保證療效、不恐嚇、給選項、符合適應症。
-只回傳 JSON：{"hint":"一句 25 字內的建議，說明下一步目的","line":"一句可以直接說的話"}`;
+治療師想知道的是：${$("#hintType").value}。
+請針對這個問題給具體建議，並附上一句他可以直接說出口的台灣口語句子。遵守倫理：不保證療效、不恐嚇、給選項、符合適應症。
+只回傳 JSON：{"hint":"40 字內的具體建議","line":"一句可以直接說的話"}`;
     const r=await aiJSON(p,{temperature:0.6});
-    addHint(`${r.hint||""}\n「${r.line||""}」`);
+    addHint(`【${$("#hintType").selectedOptions[0].text}】${r.hint||""}\n「${r.line||""}」`);
   }catch(e){ addMsg("sys", errFull(e)); }
   finally{ setBusy(false); }
 });
@@ -1036,52 +1085,64 @@ function renderReport(r){
   $("#otherBtn").addEventListener("click",()=>{ $("#reportScreen").hidden=true; $("#pickScreen").hidden=false; });
 }
 
-/* =================== CASE BUILDER =================== */
-const B_EXAMPLES=[
-  "50 歲男性計程車司機，右肩五十肩 4 個月，晚上痛醒，擔心停工沒收入",
-  "30 歲女性護理師，媽媽手 3 個月，輪班很難請假，自己是醫療人員會質疑",
-  "62 歲男性退休公務員，腰椎狹窄走路腳麻，兒子陪同來，兒子很會上網查資料",
-  "26 歲女性瑜伽老師，阿基里斯腱炎半年，想快點回去上課，預算有限",
-  "45 歲男性科技業主管，網球肘，很忙只想要最快的方法，常改約"
-];
-let DRAFT=null;
-function openBuilder(){
-  $("#pickScreen").hidden=true; $("#sessionScreen").hidden=true; $("#reportScreen").hidden=true; $("#builderScreen").hidden=false;
-  $("#bMsg").textContent=""; $("#bPreview").hidden=true; DRAFT=null;
-  $("#bExamples").innerHTML=B_EXAMPLES.map(t=>`<button type="button">${esc(t)}</button>`).join("");
-  $("#bExamples").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{ $("#bInput").value=b.textContent; }));
-  window.scrollTo(0,0);
-  $("#bInput").focus();
+/* =================== CASE COMPOSER =================== */
+const DL=id=>[...document.querySelectorAll("#"+id+" option")].map(o=>o.value);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+function readComposer(px){
+  const v=id=>{ const el=document.getElementById(px+id); return el?el.value.trim():""; };
+  return {age:v("Age"),gender:v("Gender"),region:v("Region"),job:v("Job"),pers:v("Pers"),course:v("Course"),budget:v("Budget"),more:v("More")};
 }
-$("#bCancel").addEventListener("click",()=>{ $("#builderScreen").hidden=true; $("#pickScreen").hidden=false; });
+function composerText(c){
+  const f=(label,val)=>`${label}：${val||"未指定，請你合理決定"}`;
+  return [f("年齡",c.age),f("性別",c.gender),f("受傷部位或問題",c.region),f("職業",c.job),f("個性",c.pers),f("病程",c.course),f("經濟狀況",c.budget),c.more?`其他補充：${c.more}`:""].filter(Boolean).join("\n");
+}
+document.querySelectorAll("[data-dice]").forEach(b=>b.addEventListener("click",()=>{
+  const px=b.dataset.dice, set=(id,val)=>{ const el=document.getElementById(px+id); if(el) el.value=val; };
+  const age=pick(["18","24","31","38","45","52","59","66","73","81"]);
+  set("Age",age); set("Gender",pick(["男","女"]));
+  set("Region",pick(DL("dlRegion"))); set("Job",pick(DL("dlJob"))); set("Pers",pick(DL("dlPers")));
+  const sel=id=>{ const el=document.getElementById(px+id); if(el){ const o=[...el.options].slice(1); el.value=pick(o).value; } };
+  sel("Course"); sel("Budget");
+  const m=document.getElementById(px+"Msg"); if(m) m.textContent="已隨機填入，AI 會再調整成合理的組合。";
+}));
+document.querySelectorAll("[data-clear]").forEach(b=>b.addEventListener("click",()=>{
+  const px=b.dataset.clear;
+  ["Age","Gender","Region","Job","Pers","Course","Budget","More"].forEach(id=>{ const el=document.getElementById(px+id); if(el) el.value=""; });
+  const m=document.getElementById(px+"Msg"); if(m) m.textContent="";
+}));
 
-function builderPrompt(desc, focus, diff){
-  return `你是台灣資深物理治療師與臨床教育者，要為「物理治療師溝通訓練軟體」設計一位虛構的模擬病人。病人資料要符合臨床常理，使用台灣口語繁體中文。
+let DRAFT=null;
+function builderPrompt(spec, focus, diff){
+  return `你是台灣資深物理治療師與臨床教育者，要為「物理治療師溝通訓練軟體」設計一位虛構的模擬病人。使用台灣口語繁體中文。
 
-${desc ? `治療師提供的背景：${desc}` : "請自行設計一位台灣物理治療門診常見、但與以下既有案例不重複的病人（既有：足底筋膜炎、鈣化性肌腱炎、網球肘、慢性下背痛、膝退化、跳躍膝）。"}
+治療師指定的條件：
+${spec}
 希望練習的重點：${focus || "依病情判斷最適合的方案"}
 病人難度：${diff}
 ${priceText()}
 
 規則：
-1. 名字用台灣常見姓氏加稱謂（如「黃先生」「吳阿姨」「蔡同學」），不要用真實名人。
-2. goal 要是具體、有畫面的生活目標；concerns 要 2 到 4 個沒說出口的顧慮，至少一個跟費用或時間有關。
-3. fit 要誠實寫出依實證最適合的方案。如果體外震波或其他自費項目並不是這個病情的主要適應症，要明確寫出「不建議」並說明理由，即使練習重點是推薦它。
-4. opener 是病人坐下後說的第一句話，30 到 60 字，可以用括號描述動作，帶出主訴但不要透露全部顧慮。
-5. 不要包含真實可辨識的個人資料。
+1. 指定的條件一定要採用；未指定的部分由你補上，讓整體符合台灣真實門診的常理：年齡、職業、受傷部位、病程與診斷要合理搭配（例如 16 歲不會是退休公務員、受傷機轉要符合職業或運動習慣）。
+2. 如果指定的條件彼此明顯矛盾，做最小幅度的調整，並在 note 用一句話說明調整了什麼；沒有調整就留空字串。
+3. 名字用台灣常見姓氏加上符合性別與年齡的稱謂（男：先生、阿伯、同學；女：小姐、太太、阿姨、阿嬤、同學），不要用真實名人。
+4. dx 要是受傷部位常見、臨床上合理的診斷；病人個性要明顯反映在 personality 與 opener 的說話方式。
+5. goal 要是具體、有畫面的生活目標；concerns 2 到 4 個沒說出口的顧慮，至少一個跟費用或時間有關，並符合經濟狀況。
+6. fit 要誠實寫出依實證最適合的方案。如果自費項目不是主要適應症，要明確寫「不建議」並說明理由，即使練習重點是推薦它。
+7. opener 是病人坐下後說的第一句話，30 到 60 字，可以用括號描述動作，帶出主訴但不要透露全部顧慮。
 
-只回傳一個 JSON 物件，不要其他文字：
-{"name":"","age":整數,"job":"職業與工作型態","dx":"診斷","dur":"病程","tried":"已做過的治療","chief":"主訴","goal":"內心真正的目標","concerns":["",""],"fit":"最適合的方向與理由","hook":"能打動他的關鍵","personality":"一句話描述個性與說話風格","visit":"第一次來診所 或 是第幾次回診","opener":""}`;
+只回傳一個 JSON 物件：
+{"name":"","gender":"男或女","age":整數,"job":"職業與工作型態","dx":"診斷","dur":"病程","tried":"已做過的治療","chief":"主訴","goal":"","concerns":["",""],"fit":"","hook":"能打動他的關鍵","personality":"個性與說話風格","visit":"第一次來診所 或 是第幾次回診","opener":"","note":""}`;
 }
 const B_FIELDS=[
-  ["name","名字"],["age","年齡"],["job","職業"],["dx","診斷"],["dur","病程"],["tried","已做過的治療"],["chief","主訴"],
-  ["goal","內心真正的目標（不會主動說）"],["concerns","沒說出口的顧慮（一行一個）"],["fit","最適合的方案"],
-  ["hook","能打動他的關鍵"],["personality","個性與說話風格"],["visit","就診情境"],["opener","開場白"]
+  ["name","名字"],["gender","性別"],["age","年齡"],["job","職業"],["dx","診斷"],["dur","病程"],["tried","已做過的治療"],["chief","主訴"],
+  ["personality","個性與說話風格"],["goal","內心真正的目標（不會主動說）"],["concerns","沒說出口的顧慮（一行一個）"],["fit","最適合的方案"],
+  ["hook","能打動他的關鍵"],["visit","就診情境"],["opener","開場白"]
 ];
 function renderDraft(){
   const d=DRAFT;
   const long=new Set(["tried","goal","concerns","fit","hook","personality","opener","chief"]);
-  $("#bPreview").innerHTML = `<h3 style="margin:0;font-size:17px">AI 建構的人格（可直接修改）</h3>` +
+  $("#bPreview").innerHTML = `<h3 style="margin:0;font-size:17px">AI 建構的人設（可直接修改）</h3>` +
+    (d.note?`<div class="note" style="background:var(--amber-soft);border-radius:10px;padding:8px 12px;font-size:13.5px">AI 調整說明：${esc(d.note)}</div>`:"") +
     `<div class="grid2">` + B_FIELDS.map(([k,l])=>{
       const v = k==="concerns" ? (d.concerns||[]).join("\n") : (d[k]??"");
       const full = long.has(k);
@@ -1093,8 +1154,8 @@ function renderDraft(){
       <button class="btn" id="bRedo">重新產生</button>
     </div>`;
   $("#bPreview").hidden=false;
-  $("#bStart").addEventListener("click",()=>{ const c=commitDraft(); if(c){ $("#builderScreen").hidden=true; startSession(c.id); } });
-  $("#bSave").addEventListener("click",()=>{ if(commitDraft()){ $("#builderScreen").hidden=true; $("#pickScreen").hidden=false; } });
+  $("#bStart").addEventListener("click",()=>{ const c=commitDraft(); if(c){ $("#bPreview").hidden=true; startSession(c.id); } });
+  $("#bSave").addEventListener("click",()=>{ if(commitDraft()){ $("#bPreview").hidden=true; $("#cMsg").textContent="已儲存到下方清單。"; } });
   $("#bRedo").addEventListener("click",()=>buildCase(false));
   $("#bPreview").scrollIntoView({behavior:"smooth",block:"start"});
 }
@@ -1102,51 +1163,75 @@ function commitDraft(){
   const d={...DRAFT};
   $("#bPreview").querySelectorAll("[data-k]").forEach(el=>{ d[el.dataset.k]=el.value.trim(); });
   d.concerns=String(d.concerns||"").split(/\n+/).map(x=>x.trim()).filter(Boolean);
-  if(!d.name||!d.dx){ $("#bMsg").textContent="名字和診斷不能空白。"; return null; }
+  if(!d.name||!d.dx){ $("#cMsg").textContent="名字和診斷不能空白。"; return null; }
   d.age=parseInt(d.age,10)||d.age;
   d.init=String(d.name).slice(0,1);
-  d.diff=$("#bDiff").value;
-  if(d.personality) d.concerns=[...d.concerns]; // personality kept as its own field
+  d.diff=$("#cDiff").value;
   d.id=DRAFT.id||("c"+Date.now().toString(36));
   const i=CUSTOM.findIndex(x=>x.id===d.id);
   if(i>=0) CUSTOM[i]=d; else CUSTOM.push(d);
   saveCustom(); renderCases();
   return d;
 }
-async function buildCase(random){
-  const desc = random ? "" : $("#bInput").value.trim();
-  if(!random && !desc){ $("#bInput").focus(); $("#bMsg").textContent="先寫幾句病人背景，或按「隨機產生一位」。"; return; }
-  if(!hasKey()){ $("#bMsg").textContent=errCopy("no_key"); return; }
-  ["#bBuild","#bRandom"].forEach(x=>$(x).disabled=true);
-  $("#bMsg").textContent="AI 正在建構人格，大約需要 10 到 30 秒……";
+async function buildCase(quick){
+  if(!hasKey()){ $("#cMsg").textContent=errCopy("no_key"); return; }
+  ["#cBuild","#cQuick"].forEach(x=>$(x).disabled=true);
+  $("#cMsg").textContent="AI 正在建構人設，大約需要 10 到 30 秒……";
   try{
-    const r=await aiJSON(builderPrompt(desc,$("#bFocus").value,$("#bDiff").value),{temperature:random?1.0:0.8,maxTokens:4096});
+    const r=await aiJSON(builderPrompt(composerText(readComposer("c")),$("#cFocus").value,$("#cDiff").value),{temperature:0.9,maxTokens:4096});
     if(!r||!r.name) throw {code:"parse"};
-    DRAFT={...r, id: DRAFT&&!random ? DRAFT.id : undefined};
-    if(random && r.dx) $("#bInput").value=`${r.age} 歲${r.job}，${r.dx}，${r.dur}`;
-    $("#bMsg").textContent="完成，可以檢查後修改。";
-    renderDraft();
-  }catch(e){ $("#bMsg").textContent=errCopy(e&&e.code); }
-  finally{ ["#bBuild","#bRandom"].forEach(x=>$(x).disabled=false); }
+    DRAFT={...r, id:undefined};
+    if(quick){
+      DRAFT.id="c"+Date.now().toString(36);
+      const c={...DRAFT,init:String(r.name).slice(0,1),diff:$("#cDiff").value,concerns:Array.isArray(r.concerns)?r.concerns:[]};
+      CUSTOM.push(c); saveCustom(); renderCases();
+      $("#cMsg").textContent=r.note?`AI 調整：${r.note}`:"";
+      startSession(c.id);
+    }else{
+      $("#cMsg").textContent="完成，可以檢查後修改。";
+      renderDraft();
+    }
+  }catch(e){ $("#cMsg").textContent=errCopy(e&&e.code); }
+  finally{ ["#cBuild","#cQuick"].forEach(x=>$(x).disabled=false); }
 }
-$("#bBuild").addEventListener("click",()=>buildCase(false));
-$("#bRandom").addEventListener("click",()=>buildCase(true));
+$("#cBuild").addEventListener("click",()=>buildCase(false));
+$("#cQuick").addEventListener("click",()=>buildCase(true));
 
 /* =================== CLINIC SIM =================== */
+const K_ASK={
+  "主訴與病史":["疼痛位置與範圍","疼痛性質（刺痛／痠／麻／燒灼）","發生經過與受傷機轉","加重與緩解因素","24 小時變化（晨僵、夜間痛）","過去病史與手術史","目前用藥（含抗凝血劑、類固醇）","工作與日常活動需求","運動習慣","之前的治療與效果","病人的目標與期待","疼痛分數 NPRS"],
+  "紅旗篩檢":["夜間持續痛、休息不緩解","不明原因體重減輕","發燒或感染徵象","大小便控制改變、鞍區麻木","癌症病史","重大外傷或骨鬆","進行性無力或麻木","胸痛、喘或頭暈"],
+  "黃旗（心理社會）":["對疼痛的恐懼與迴避","睡眠與情緒","工作壓力與請假狀況","對治療的期待與信念","家人支持"]
+};
+const K_TESTS={
+  "頸椎":["頸椎主動 ROM","Spurling test","Distraction test","ULTT 上肢神經張力測試","深層頸屈肌耐力測試","頸椎附屬動作 PAIVM"],
+  "肩":["肩關節主動／被動 ROM","Neer test","Hawkins-Kennedy test","Empty can test","Drop arm test","External rotation lag sign","Speed's test","O'Brien test","Apprehension / Relocation test","被動外轉受限（關節囊型態）","肩胛動態評估"],
+  "肘腕手":["Cozen test","Mill's test","Maudsley test","Finkelstein test","Phalen test","Tinel sign","握力測試"],
+  "胸腰椎骨盆":["腰椎 ROM 與重複動作（McKenzie）","SLR 直膝抬腿","Slump test","Prone instability test","腰椎 PA 附屬動作","薦髂關節激發測試群組","L2–S1 神經學檢查"],
+  "髖":["髖關節 ROM","FADIR test","FABER test","Thomas test","Trendelenburg sign","單腳站立／單腳蹲"],
+  "膝":["膝關節 ROM 與積水測試","Lachman test","前／後抽屜測試","McMurray test","Thessaly test","內外翻壓力測試","Patellar grind (Clarke)","髕骨活動度","Ober test","單腳蹲品質"],
+  "踝足":["踝關節 ROM（膝彎／膝直背屈）","前抽屜測試","Talar tilt","Thompson test","Windlass test","Squeeze test","Ottawa 踝關節規則","足弓與足部姿勢 FPI"],
+  "神經與平衡":["皮節感覺檢查","肌節肌力","深部肌腱反射","Babinski／Hoffmann","Romberg test","Berg 平衡量表","TUG 計時起走"]
+};
+const K_EXAM=["觀察：姿勢與外觀","觸診：壓痛、腫脹、溫度","主動 ROM","被動 ROM 與末端感覺","徒手肌力測試 MMT","關節附屬動作","肌肉長度測試","步態分析","功能性動作（蹲、上下樓梯、伸手）","查看影像或報告"];
+const K_MEASURE=["NPRS 疼痛分數","PSFS 病人特定功能量表","ODI 下背失能","NDI 頸部失能","SPADI 肩功能","QuickDASH 上肢功能","LEFS 下肢功能","KOOS 膝功能","FAAM 踝足功能","30 秒坐站測試","單腳站立時間","6 分鐘行走測試"];
+const K_EDU=["疼痛科學衛教","活動調整與負荷管理","居家運動處方（組數／次數／頻率）","姿勢與人體工學建議","睡姿建議","回歸工作／運動的漸進計畫","護具、貼紮或鞋墊建議","自費與健保方案說明"];
+const K_REFER=["轉介骨科評估","轉介復健科醫師","轉介神經內科","建議影像檢查","建議回診原主治醫師","緊急就醫"];
 const K_TOOLS={
   "理學檢查":["觸診","關節活動度 ROM","徒手肌力測試 MMT","特殊測試（請寫測試名稱）","神經學檢查（感覺/反射/肌力）","姿勢與步態評估","功能性動作測試","查看影像或報告"],
   "儀器治療":["熱療","冰療","電療 TENS","超音波","牽引","體外震波"],
-  "徒手治療":["關節鬆動術","筋膜放鬆","神經鬆動術","軟組織按摩"],
-  "運動治療":["核心穩定訓練","肌力訓練","離心訓練","伸展","本體覺平衡訓練","有氧耐力"],
+  "徒手治療":["關節鬆動術","關節操作術","筋膜放鬆","激痛點治療","神經鬆動術","軟組織按摩","肌肉能量技術 MET"],
+  "運動治療":["核心穩定訓練","肌力訓練","離心訓練","等長收縮止痛","伸展","神經肌肉控制訓練","本體覺平衡訓練","增強式訓練","有氧耐力","功能性與專項動作訓練"],
 };
-const K_SELF=new Set(["體外震波","關節鬆動術","筋膜放鬆","神經鬆動術","肌力訓練","離心訓練","核心穩定訓練"]);
+const K_SELF=new Set(["體外震波","關節鬆動術","關節操作術","筋膜放鬆","激痛點治療","神經鬆動術","肌力訓練","離心訓練","核心穩定訓練","神經肌肉控制訓練","增強式訓練","功能性與專項動作訓練"]);
+let K_REGION="肩";
 let K=null;
 function kSources(){
-  $("#kSource").innerHTML=`<option value="">AI 隨機產生新病人（診斷完全隱藏）</option>`+allCases().map(c=>`<option value="${esc(c.id)}">${esc(c.name)}：${esc(c.chief)}</option>`).join("");
+  $("#kSource").innerHTML=`<option value="">不使用（依左側條件產生）</option>`+allCases().map(c=>`<option value="${esc(c.id)}">${esc(c.name)}：${esc(c.chief)}</option>`).join("");
 }
 document.querySelector('nav.tabs button[data-view="clinic"]').addEventListener("click",()=>{ if(!K) kSources(); });
 function kAdd(kind,text,act){
-  if(kind==="pt") return voiceMsg($("#kLog"), text, K&&K.c&&K.c.name);
+  if(kind==="pt") return voiceMsg($("#kLog"), text, K&&K.c);
   const d=document.createElement("div"); d.className="msg "+kind;
   if(act){ const a=document.createElement("span"); a.className="act"; a.textContent=act; d.appendChild(a); }
   d.appendChild(document.createTextNode(text));
@@ -1169,16 +1254,27 @@ function kSide(){
       <div class="meter-row"><span>病人滿意度</span><span>${K.sat}</span></div>
       <div class="meter"><i style="width:${K.sat}%;background:var(--amber)"></i></div>
     </div>
-    <div class="tools">${Object.entries(K_TOOLS).map(([g,arr])=>`<h4>${g}</h4><div class="chips">${arr.map(t=>`<button data-g="${g}" class="${K_SELF.has(t)?'self':''}">${esc(t)}</button>`).join("")}</div>`).join("")}
-      <p class="muted" style="font-size:12px;margin:2px 0 0">黃框為常見自費項目</p></div>`;
+    <div class="tools">
+      ${kGroup("問診","ask",Object.entries(K_ASK).map(([h,a])=>`<h4>${h}</h4>`+kChips(a,"ask",h==="紅旗篩檢"?"flag":"")).join(""),true)}
+      ${kGroup("一般理學檢查","exam",kChips(K_EXAM,"exam"))}
+      ${kGroup("特殊測試","test",`<select id="kRegion">${Object.keys(K_TESTS).map(r=>`<option ${r===K_REGION?"selected":""}>${r}</option>`).join("")}</select>`+kChips(K_TESTS[K_REGION],"test"))}
+      ${kGroup("評估量表與功能測試","measure",kChips(K_MEASURE,"measure"))}
+      ${Object.entries(K_TOOLS).filter(([g])=>g!=="理學檢查").map(([g,a])=>kGroup(g,"tx",kChips(a,"tx"))).join("")}
+      ${kGroup("衛教與居家","edu",kChips(K_EDU,"edu"))}
+      ${kGroup("轉介","refer",kChips(K_REFER,"refer","flag"))}
+      <p class="muted" style="font-size:12px;margin:2px 0 0">黃框：常見自費項目；紅框：安全相關</p></div>`;
+  const kr=document.getElementById("kRegion");
+  if(kr) kr.addEventListener("change",()=>{ K_REGION=kr.value; kSide(); const d=$("#kSide").querySelector('details[data-g="test"]'); if(d) d.open=true; });
   $("#kSide").querySelectorAll(".chips button").forEach(b=>b.addEventListener("click",()=>{
-    const g=b.dataset.g;
-    $("#kType").value = g==="理學檢查"?"理學檢查":"治療";
-    const t=b.textContent;
-    $("#kInput").value = g==="理學檢查" ? `做${t}：` : `${t}，部位／參數／時間：`;
-    $("#kInput").focus();
+    const k=b.dataset.k, t=b.textContent;
+    const map={ask:["問診",`詢問：${t}`],exam:["理學檢查",`做${t}，部位：`],test:["理學檢查",`做 ${t}（${K_REGION}）`],measure:["理學檢查",`請病人完成 ${t}`],
+      tx:["治療",`${t}，部位／參數／時間：`],edu:[t.startsWith("居家運動")?"居家運動":"衛教說明",`${t}：`],refer:["轉介",`${t}，理由：`]};
+    const [type,txt]=map[k]||["治療",t];
+    $("#kType").value=type; $("#kInput").value=txt; $("#kInput").focus();
   }));
 }
+function kChips(arr,k,cls){ return `<div class="chips">${arr.map(t=>`<button data-k="${k}" class="${cls||(K_SELF.has(t)?'self':'')}">${esc(t)}</button>`).join("")}</div>`; }
+function kGroup(title,g,inner,open){ return `<details data-g="${g}" ${open?"open":""}><summary>${title}</summary>${inner}</details>`; }
 function kTranscript(){
   const sums=K.summaries.map((x,i)=>`第 ${i+1} 次就診摘要：${x}`).join("\n");
   const now=K.turns.slice(-30).map(t=>`[${t.k}] ${t.t}`).join("\n");
@@ -1186,7 +1282,7 @@ function kTranscript(){
 }
 function kBase(){
   return `你是物理治療臨床模擬的引擎，同時扮演病人和病人的身體反應。使用台灣口語繁體中文。
-病人公開資料：${K.c.name}，${K.c.age} 歲，${K.c.job}。主訴：${K.c.chief}。
+病人公開資料：${K.c.name}，${K.c.gender||""}，${K.c.age} 歲，${K.c.job}。主訴：${K.c.chief}。個性與說話風格：${K.c.personality||"一般"}（扮演病人時要一致）。
 【隱藏的真實狀況，不可直接告訴治療師，只能透過問診和檢查結果呈現】
 真正診斷：${K.h.dx}
 關鍵病史線索：${K.h.history}
@@ -1201,26 +1297,30 @@ ${priceText()}
 ${kTranscript()}`;
 }
 $("#kStart").addEventListener("click", async()=>{
-  if(!hasKey()){ $("#kStartMsg").textContent=errCopy("no_key"); return; }
+  if(!hasKey()){ $("#kMsg").textContent=errCopy("no_key"); return; }
   const id=$("#kSource").value, src=allCases().find(c=>c.id===id);
-  $("#kStart").disabled=true; $("#kStartMsg").textContent="AI 正在準備病人，約 10 到 30 秒……";
+  $("#kStart").disabled=true; $("#kMsg").textContent="AI 正在準備病人，約 10 到 30 秒……";
   const p=`你要為物理治療臨床模擬設計一位台灣病人，使用台灣繁體中文。
-${src?`以這位病人為基礎：${src.name}，${src.age} 歲，${src.job}，診斷 ${src.dx}，病程 ${src.dur}，主訴 ${src.chief}，已做過 ${src.tried}。`:"自行設計一位物理治療門診常見的病人（肌肉骨骼、神經或運動傷害皆可），診斷要合理但不要太冷門。"}
+${src?`以這位病人為基礎：${src.name}，${src.gender||""}，${src.age} 歲，${src.job}，診斷 ${src.dx}，病程 ${src.dur}，主訴 ${src.chief}，已做過 ${src.tried}，個性 ${src.personality||""}。`:`治療師指定的條件（一定要採用，未指定的由你合理決定；年齡、職業、受傷部位、病程與診斷要合理搭配，條件矛盾時最小幅度調整並寫在 note）：
+${composerText(readComposer("k"))}
+診斷要是該部位常見、可透過問診與理學檢查推得的狀況，不要太冷門。`}
+名字用台灣常見姓氏加上符合性別與年齡的稱謂。病人的個性要反映在說話方式。
 難度：${$("#kLevel").value}
 要求：真實診斷要能透過問診與理學檢查推得；bestPlan 要依實證，寫清楚各階段（急性期、修復期、回歸功能）重點，並說明自費項目是否適合；不要包含真實個人資料。
-只回傳 JSON：{"name":"","age":整數,"job":"","chief":"病人自述的主訴","opener":"病人坐下說的第一句話 30 到 60 字","pain":0到10整數,"func":0到100整數（目前功能）,"hidden":{"dx":"真正診斷","history":"關鍵病史線索","findings":"各項理學檢查應有的結果，含陽性與陰性","redFlags":"紅旗徵象，沒有就寫無","bestPlan":"","visits":整數}}`;
+只回傳 JSON：{"name":"","gender":"男或女","age":整數,"job":"","personality":"個性與說話風格","note":"","chief":"病人自述的主訴","opener":"病人坐下說的第一句話 30 到 60 字","pain":0到10整數,"func":0到100整數（目前功能）,"hidden":{"dx":"真正診斷","history":"關鍵病史線索","findings":"各項理學檢查應有的結果，含陽性與陰性","redFlags":"紅旗徵象，沒有就寫無","bestPlan":"","visits":整數}}`;
   try{
     const r=await aiJSON(p,{temperature:0.9,maxTokens:4096});
     if(!r||!r.name||!r.hidden) throw {code:"parse"};
-    K={c:{name:r.name,age:r.age,job:r.job,chief:r.chief},h:r.hidden,level:$("#kLevel").value,
+    K={c:{name:r.name,gender:r.gender,age:r.age,job:r.job,chief:r.chief,personality:r.personality},h:r.hidden,level:$("#kLevel").value,
        pain:+r.pain||5,func:+r.func||40,sat:60,visit:1,day:1,cost:0,myDx:"",turns:[],summaries:[],busy:false,done:false};
     $("#kPick").hidden=true; $("#kReport").hidden=true; $("#kSession").hidden=false;
     $("#kTitle").textContent=`${r.name}的臨床模擬`;
     $("#kLog").innerHTML=""; kSide();
     kAdd("sys","第 1 次就診（初診）。先問診和做檢查，再下診斷與安排治療。");
     kAdd("pt", r.opener||r.chief); K.turns.push({k:"病人",t:r.opener||r.chief});
-    $("#kStartMsg").textContent="";
-  }catch(e){ $("#kStartMsg").textContent=errCopy(e&&e.code); }
+    $("#kMsg").textContent="";
+    if(r.note) kAdd("sys",`AI 調整說明：${r.note}`);
+  }catch(e){ $("#kMsg").textContent=errCopy(e&&e.code); }
   finally{ $("#kStart").disabled=false; }
 });
 function kBusy(b){ K.busy=b; ["#kSend","#kNext","#kEnd"].forEach(x=>$(x).disabled=b); }
@@ -1258,6 +1358,26 @@ function kApply(r){
   const c=parseInt(r.cost,10); if(c>0) K.cost+=c;
 }
 $("#kSend").addEventListener("click",kSendAct);
+$("#kHint").addEventListener("click", async()=>{
+  if(!K||K.busy||K.done) return;
+  kBusy(true); $("#kHint").disabled=true;
+  const q=$("#kHintType").value, label=$("#kHintType").selectedOptions[0].text;
+  const p=`你是資深物理治療臨床教師，正在指導一位治療師處理模擬病人。使用台灣繁體中文。
+病人：${K.c.name}，${K.c.gender||""}，${K.c.age} 歲，${K.c.job}。主訴：${K.c.chief}。
+治療師目前的工作診斷：${K.myDx||"尚未下診斷"}。目前疼痛 ${K.pain}/10，功能 ${K.func}%。
+${kTranscript()}
+
+教學原則：你看不到病人真正的診斷，也不可以猜測後直接說出答案；只能根據上面治療師已經問到、查到的資訊做臨床推理。像蘇格拉底式教學一樣，給方向、給理由、指出還缺什麼證據。提到特殊測試時，可簡述其臨床意義。
+治療師想知道：${q}
+只回傳 JSON：{"hint":"120 字內的具體建議，可分點用「；」隔開","next":"一個建議下一步可以直接做的動作，例如『做 Hawkins-Kennedy test』或『詢問夜間痛』"}`;
+  try{
+    const r=await aiJSON(p,{temperature:0.5});
+    const d=document.createElement("div"); d.className="hint";
+    d.innerHTML=`<b>臨床推理提示｜${esc(label)}</b>${esc(r.hint||"")}${r.next?`<br>👉 ${esc(r.next)}`:""}`;
+    $("#kLog").appendChild(d); $("#kLog").scrollTop=$("#kLog").scrollHeight;
+  }catch(e){ kAdd("sys",errFull(e)); }
+  finally{ kBusy(false); $("#kHint").disabled=false; }
+});
 $("#kInput").addEventListener("keydown",e=>{ if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){ e.preventDefault(); kSendAct(); } });
 $("#kNext").addEventListener("click", async()=>{
   if(!K||K.busy||K.done) return;
@@ -1510,46 +1630,75 @@ $("#saveSet").addEventListener("click",()=>{
 });
 
 /* =================== VOICE =================== */
-const V={tts:false,auto:false,voice:"",rate:1};
+const V={tts:false,auto:false,voiceF:"",voiceM:"",rate:1};
 try{ Object.assign(V, JSON.parse(localStorage.getItem("ptt-voice")||"{}")); }catch(e){}
 const saveV=()=>{ try{localStorage.setItem("ptt-voice",JSON.stringify(V));}catch(e){} };
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 const canTTS = "speechSynthesis" in window;
 let VOICES=[];
+const FEMALE=/HsiaoChen|HsiaoYu|Hanhan|Yating|Meijia|Mei-Jia|Sinji|Xiaoxiao|Xiaoyi|Huihui|女|female/i;
+const MALE=/YunJhe|Zhiwei|Yunxi|Yunyang|Kangkang|Liang|男|male/i;
+function vScore(v){
+  let s=0;
+  if(/zh[-_]TW/i.test(v.lang)) s+=50; else if(/zh[-_](HK|CN)/i.test(v.lang)) s+=10;
+  if(/Natural|Online|Neural/i.test(v.name)) s+=40;          // Edge 神經網路語音，最自然
+  else if(/Google/i.test(v.name)) s+=25;                      // Chrome 雲端語音
+  else if(/Meijia|Mei-Jia/i.test(v.name)) s+=20;              // macOS
+  if(/Desktop|Hanhan|Yating|Zhiwei/i.test(v.name) && !/Natural|Online/i.test(v.name)) s-=15; // 舊式合成，較機械
+  return s;
+}
+const isGood=v=>vScore(v)>=65;
 function loadVoices(){
   if(!canTTS) return;
-  const all=speechSynthesis.getVoices();
-  VOICES=all.filter(v=>/^zh/i.test(v.lang)).sort((a,b)=>(b.lang==="zh-TW")-(a.lang==="zh-TW"));
-  const sel=document.getElementById("vVoice"); if(!sel) return;
-  sel.innerHTML=`<option value="">自動（依病人性別調整音高）</option>`+VOICES.map(v=>`<option value="${esc(v.name)}">${esc(v.name)}（${esc(v.lang)}）</option>`).join("");
-  sel.value=V.voice||"";
+  VOICES=speechSynthesis.getVoices().filter(v=>/^zh/i.test(v.lang)).sort((a,b)=>vScore(b)-vScore(a));
+  ["vVoiceF","vVoiceM"].forEach(id=>{
+    const sel=document.getElementById(id); if(!sel) return;
+    sel.innerHTML=`<option value="">自動挑選最自然的聲音</option>`+VOICES.map(v=>`<option value="${esc(v.name)}">${isGood(v)?"推薦｜":""}${esc(v.name)}（${esc(v.lang)}）</option>`).join("");
+    sel.value=(id==="vVoiceF"?V.voiceF:V.voiceM)||"";
+  });
+  const m=document.getElementById("vMsg");
+  if(m && VOICES.length && !VOICES.some(isGood)) m.textContent="這個瀏覽器沒有比較自然的中文語音，建議改用 Microsoft Edge 開啟，聲音會自然很多。";
 }
 if(canTTS){ loadVoices(); speechSynthesis.onvoiceschanged=loadVoices; }
-function speakText(text, name){
-  if(!canTTS||!V.tts) return;
-  const clean=String(text).replace(/（[^）]*）|\([^)]*\)/g,"").trim();
-  if(!clean) return;
-  speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(clean);
-  u.lang="zh-TW"; u.rate=V.rate||1;
-  const v = VOICES.find(x=>x.name===V.voice) || VOICES.find(x=>x.lang==="zh-TW") || VOICES[0];
-  if(v) u.voice=v;
-  const n=String(name||"");
-  if(/先生|阿伯|伯|爺|同學/.test(n)) u.pitch=0.8;
-  else if(/小姐|太太|阿姨|女士|媽|嬤/.test(n)) u.pitch=1.15;
-  if(/阿伯|阿嬤|阿姨|爺/.test(n)) u.rate=(V.rate||1)*0.9;
-  speechSynthesis.speak(u);
+function genderOf(who){
+  if(!who) return "";
+  if(typeof who==="object"){ if(/女/.test(who.gender||"")) return "F"; if(/男/.test(who.gender||"")) return "M"; who=who.name||""; }
+  if(/小姐|太太|阿姨|女士|媽|嬤|姊|姐/.test(who)) return "F";
+  if(/先生|阿伯|伯|爺|哥/.test(who)) return "M";
+  return "";
 }
-function voiceMsg(log, text, name){
+function chooseVoice(g){
+  const want = g==="F"?V.voiceF : g==="M"?V.voiceM : (V.voiceF||V.voiceM);
+  let v = VOICES.find(x=>x.name===want);
+  if(v) return v;
+  const re = g==="F"?FEMALE : g==="M"?MALE : null;
+  return (re && VOICES.find(x=>re.test(x.name) && isGood(x))) || VOICES.find(isGood) || (re && VOICES.find(x=>re.test(x.name))) || VOICES[0];
+}
+function speakText(text, who, keep){
+  if(!canTTS||!V.tts) return;
+  const clean=String(text).replace(/（[^）]*）|\([^)]*\)|[「」『』…—~～*#]/g,"").replace(/\s+/g," ").trim();
+  if(!clean) return;
+  if(!keep) speechSynthesis.cancel();
+  const voice=chooseVoice(genderOf(who));
+  // 依句子切段播放，避免長句被截斷或聲音失真；音高維持原聲，不做人工變調
+  const parts=clean.match(/[^。！？!?；;]+[。！？!?；;]?/g)||[clean];
+  parts.map(t=>t.trim()).filter(Boolean).forEach(t=>{
+    const u=new SpeechSynthesisUtterance(t);
+    u.lang=(voice&&voice.lang)||"zh-TW"; u.rate=V.rate||1; u.pitch=1; u.volume=1;
+    if(voice) u.voice=voice;
+    speechSynthesis.speak(u);
+  });
+}
+function voiceMsg(log, text, who){
   const d=document.createElement("div"); d.className="msg pt";
   d.appendChild(document.createTextNode(text));
   if(canTTS){
     const b=document.createElement("button"); b.className="say-btn"; b.type="button"; b.textContent="🔊"; b.title="再聽一次";
-    b.addEventListener("click",()=>{ const t=V.tts; V.tts=true; speakText(text,name); V.tts=t; });
+    b.addEventListener("click",()=>{ const t=V.tts; V.tts=true; speakText(text,who); V.tts=t; });
     d.appendChild(b);
   }
   log.appendChild(d); log.scrollTop=log.scrollHeight;
-  speakText(text,name);
+  speakText(text,who);
   return d;
 }
 function syncToggles(){
@@ -1608,17 +1757,18 @@ attachMic(document.getElementById("kInput"), document.getElementById("kSend"));
 
 /* settings */
 (function(){
-  const t=$("#vTTS"), a=$("#vAuto"), sel=$("#vVoice"), r=$("#vRate");
+  const t=$("#vTTS"), a=$("#vAuto"), sf=$("#vVoiceF"), sm=$("#vVoiceM"), r=$("#vRate");
   if(!t) return;
   t.checked=!!V.tts; a.checked=!!V.auto; r.value=V.rate||1;
   if(!SR){ a.disabled=true; a.parentNode.style.opacity=.5; }
-  if(!canTTS){ t.disabled=true; sel.disabled=true; $("#vMsg").textContent="這個瀏覽器不支援語音朗讀。"; }
+  if(!canTTS){ t.disabled=true; sf.disabled=true; sm.disabled=true; $("#vMsg").textContent="這個瀏覽器不支援語音朗讀。"; }
   if(!SR) $("#vMsg").textContent=($("#vMsg").textContent+" 這個瀏覽器不支援語音輸入，請改用 Chrome 或 Edge。").trim();
   t.addEventListener("change",()=>{ V.tts=t.checked; saveV(); syncToggles(); });
   a.addEventListener("change",()=>{ V.auto=a.checked; saveV(); });
-  sel.addEventListener("change",()=>{ V.voice=sel.value; saveV(); });
+  sf.addEventListener("change",()=>{ V.voiceF=sf.value; saveV(); });
+  sm.addEventListener("change",()=>{ V.voiceM=sm.value; saveV(); });
   r.addEventListener("input",()=>{ V.rate=+r.value; saveV(); });
-  $("#vTest").addEventListener("click",()=>{ const o=V.tts; V.tts=true; speakText("老師你好，我這個肩膀痛了快半年，晚上都睡不好。","陳先生"); V.tts=o; });
+  $("#vTest").addEventListener("click",()=>{ const o=V.tts; V.tts=true; speakText("老師你好，我這個肩膀痛了快半年，晚上都睡不好。",{gender:"女"}); speakText("我是覺得啦，健保做做熱敷應該就夠了吧？",{gender:"男"},true); V.tts=o; });
 })();
 </script>
 </body>
