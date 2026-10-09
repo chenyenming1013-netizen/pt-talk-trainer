@@ -128,6 +128,45 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
 .chips button.flag{border-color:var(--rose)}
 .reason{display:flex;gap:8px;align-items:center;padding:8px 12px 0;flex-wrap:wrap}
 .reason select{font:inherit;font-size:13.5px;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:6px 8px;flex:1;min-width:180px}
+.side-body{display:flex;flex-direction:column;gap:14px}
+.stage{position:relative}
+.av-frame{position:relative;aspect-ratio:1/1;border-radius:14px;overflow:hidden;background:linear-gradient(135deg,var(--surface-2),var(--patient))}
+.av-frame canvas{position:absolute;inset:0;width:100%;height:100%;display:block;transform-origin:50% 85%}
+.av-init{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--hand);font-size:72px;font-weight:700;color:var(--sage)}
+.stage.hasimg .av-init{display:none}
+.av-status{position:absolute;left:0;right:0;bottom:0;padding:18px 10px 8px;font-size:12.5px;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.6))}
+.av-status:empty{display:none}
+.stage.loading .av-frame::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.14) 50%,transparent 70%);background-size:200% 100%;animation:shimmer 1.4s linear infinite}
+@keyframes shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+.av-tools{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:6px;font-size:12.5px;color:var(--ink-2)}
+.av-tools button{border:0;background:transparent;color:var(--ink-2);font-size:12.5px;text-decoration:underline;padding:2px;white-space:nowrap}
+.avatar.photo{object-fit:cover;padding:0}
+@media (max-width:860px){
+  .stage{position:fixed;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 104px);width:118px;z-index:20;border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.35);background:var(--surface)}
+  .stage .av-tools{display:none}
+  .stage .av-init{font-size:40px}
+}
+@media (prefers-reduced-motion:reduce){.stage.loading .av-frame::after{animation:none}}
+.ev{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:99px;white-space:nowrap;vertical-align:1px}
+.ev.good{background:var(--sage-soft);color:var(--sage)}
+.ev.mid{background:var(--amber-soft);color:var(--amber)}
+.ev.bad{background:var(--rose-soft);color:var(--rose)}
+.ev.na{background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
+.msg.evid{align-self:center;max-width:92%;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;font-size:13.5px;white-space:normal}
+.msg.evid b{display:block;font-size:12.5px;color:var(--sage);margin-bottom:4px}
+.evrow{margin:3px 0}
+.msg.evid a,.evtab a{color:var(--sage)}
+.evtab{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0 12px}
+.evtab td{padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+.evtab td:first-child{width:42%}
+.evtab tr.hit td{background:var(--amber-soft)}
+.lib-form{display:grid;gap:10px;margin-bottom:16px}
+.lib-form label{display:grid;gap:4px;font-size:14px;color:var(--ink-2)}
+.lib-form input,.lib-form select,.lib-form textarea{font:inherit;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%}
+.lib-form textarea{min-height:70px;resize:vertical}
+.script-card{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.script-card h3{margin:0 0 6px;font-size:16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.script-card .meta{font-size:12.5px;color:var(--ink-2)}
 .section-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 12px}
 .section-h h2{margin:0;font-size:19px}
 .section-h span{color:var(--ink-2);font-size:13.5px}
@@ -273,12 +312,12 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
       <button role="tab" data-view="practice" aria-selected="true">情境演練</button>
       <button role="tab" data-view="clinic" aria-selected="false">臨床模擬</button>
       <button role="tab" data-view="drill" aria-selected="false">異議快練</button>
-      <button role="tab" data-view="library" aria-selected="false">話術庫</button>
+      <button role="tab" data-view="library" aria-selected="false">專業溝通訓練</button>
       <button role="tab" data-view="record" aria-selected="false">紀錄與設定</button>
     </nav>
   </header>
 
-  <div class="notice" id="aiNotice">還沒有設定 Gemini API 金鑰，所以 AI 病人和評分暫時無法使用。請向診所負責人取得金鑰，到「紀錄與設定」貼上就能開始。沒有金鑰時，仍可以使用話術庫，以及異議快練的「參考答案」。 <button class="btn" id="goSet" style="margin-left:6px">前往設定</button></div>
+  <div class="notice" id="aiNotice">還沒有設定 Gemini API 金鑰，所以 AI 病人和評分暫時無法使用。請向診所負責人取得金鑰，到「紀錄與設定」貼上就能開始。沒有金鑰時，仍可以使用專業溝通訓練，以及異議快練的「參考答案」。 <button class="btn" id="goSet" style="margin-left:6px">前往設定</button></div>
 
   <div class="notice" id="codeBox">
     <b>請輸入診所通行碼</b>（向診所負責人詢問，每台裝置只需輸入一次）
@@ -305,7 +344,7 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
           </ol>
         </div>
         <div class="ethic">
-          <h2>業績來自信任，不是話術壓力</h2>
+          <h2>業績來自信任，不是推銷壓力</h2>
           <p>好的說明是讓病人「聽懂自己的問題，選到適合的方案」。自費項目要符合適應症、清楚告知費用與可能次數，不保證療效。</p>
           <p>AI 教練會把「誇大療效、製造恐懼、不給選擇」列為扣分項。病人真的不適合震波時，推薦正確方案才是高分。</p>
         </div>
@@ -349,7 +388,7 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
 
     <div id="sessionScreen" hidden>
       <div class="session">
-        <aside class="side" id="side"></aside>
+        <aside class="side"><div class="stage" id="stageP"></div><div class="side-body" id="side"></div></aside>
         <div class="chat">
           <div class="chat-head">
             <span class="title" id="chatTitle">演練中</span>
@@ -413,7 +452,7 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
 
     <div id="kSession" hidden>
       <div class="session">
-        <aside class="side" id="kSide"></aside>
+        <aside class="side"><div class="stage" id="stageK"></div><div class="side-body" id="kSide"></div></aside>
         <div class="chat">
           <div class="chat-head">
             <span class="title" id="kTitle">臨床模擬</span>
@@ -636,6 +675,9 @@ const LIB = {
     {t:"提出選項", aim:"給兩到三個方案，說清楚差別、次數、總費用與病人要付出的時間。", say:["第一個選擇是繼續健保復健，加上回家的伸展；第二個是加上震波，每週一次約 4 次，總共大概是這個費用。","兩個都是正確的選擇，差別在速度和投入。你比較傾向哪一個？"], avoid:"只給一個自費選項，或把健保方案說得很沒用。"},
     {t:"處理顧慮並邀約", aim:"把異議當成資訊，回應後請病人做一個小決定（試做、排時間、回家討論）。", say:["聽起來你最擔心的是費用，還是效果？","要不要先排第一次，做完我們一起看反應，再決定後面要不要繼續？"], avoid:"「今天不做名額就沒了」這類製造壓力的說法。"}
   ]},
+  cond:{title:"各診斷說明腳本"},
+  evid:{title:"實證查核"},
+  gen:{title:"AI 生成話術"},
   mods:{title:"各項治療的白話說明"},
   obj:{title:"常見異議與回應"},
   ethic:{title:"說明自費的底線", lead:"這些是教練評分時的扣分項，也是保護你和病人的界線。"}
@@ -827,11 +869,16 @@ document.querySelectorAll("nav.tabs button").forEach(b=>b.addEventListener("clic
 /* =================== PRACTICE =================== */
 let CUSTOM=[];
 try{ const c=JSON.parse(localStorage.getItem("ptt-cases")||"null"); if(Array.isArray(c)) CUSTOM=c; }catch(e){}
-function saveCustom(){ try{localStorage.setItem("ptt-cases",JSON.stringify(CUSTOM));}catch(e){} }
+function saveCustom(){
+  for(let i=0;i<=CUSTOM.length;i++){
+    try{ localStorage.setItem("ptt-cases",JSON.stringify(CUSTOM)); return; }
+    catch(e){ const old=CUSTOM.find(c=>c.img); if(!old) return; delete old.img; } // 空間不足時先移除最舊的照片
+  }
+}
 const allCases=()=>[...CUSTOM];
 function caseCard(c,own){
   return `<div class="case-wrap"><button class="case" data-id="${esc(c.id)}">
-      <span class="who"><span class="avatar">${esc(c.init||String(c.name||"?").slice(0,1))}</span>
+      <span class="who">${c.img?`<img class="avatar photo" src="${c.img}" alt="">`:`<span class="avatar">${esc(c.init||String(c.name||"?").slice(0,1))}</span>`}
         <span><span class="name">${esc(c.name)}</span>${own?'<span class="own">自訂</span>':''}<br><span class="meta">${esc(c.age)} 歲，${esc(String(c.job||"").split("，")[0])}</span></span>
         <span class="diff">${esc(c.diff)}</span></span>
       <span class="dx">${esc(c.dx)}，${esc(c.dur)}</span>
@@ -857,6 +904,7 @@ function startSession(id){
   $("#pickScreen").hidden = true; $("#reportScreen").hidden = true; $("#sessionScreen").hidden = false;
   $("#chatTitle").textContent = `與${c.name}的對話`;
   renderSide();
+  showPortrait(avatarP(), c, ()=>{ saveCustom(); renderCases(); });
   const opener = openerFor(c);
   $("#log").innerHTML = "";
   const visit = c.visit || (["ct","lb","jk"].includes(c.id)?"第一次來診所":"是第四次回診");
@@ -962,6 +1010,8 @@ async function send(){
   if(!hasKey()){ addMsg("sys", errCopy("no_key")); return; }
   $("#input").value="";
   addMsg("me", txt); S.turns.push({role:"therapist", text:txt});
+  { const cond=findCond(S.c.dx), items=matchTx(cond,txt);
+    if(items.length){ addEvidCard($("#log"), evidCardHTML(cond,items,S.c.dx)); (S.evLog=S.evLog||[]).push(...items.map(i=>i.tx)); } }
   setBusy(true);
   const typing=document.createElement("div"); typing.className="typing"; typing.textContent=`${S.c.name}正在想……`;
   $("#log").appendChild(typing); $("#log").scrollTop=$("#log").scrollHeight;
@@ -1034,6 +1084,7 @@ $("#endBtn").addEventListener("click", async()=>{
 病人藏著的目標：${S.c.goal}
 病人藏著的顧慮：${S.c.concerns.join("；")}
 這位病人最適合的方向：${S.c.fit}
+${(()=>{ const c=findCond(S.c.dx); return c?`實證參考（評 options 與 ethics 時，治療師推薦的處置必須符合以下指引；推薦「不建議」項目要扣分）：\n${evidText(c)}`:"此診斷不在內建實證資料庫，依一般臨床實證判斷。"; })()}
 ${priceText()}
 對話結束時病人信任度：${S.trust}/100，病人決定：${S.decision||"尚未決定"}
 
@@ -1062,6 +1113,15 @@ rapport 關係建立、discovery 需求探詢、education 衛教說明、options
 
 const DIMNAME={rapport:"關係建立",discovery:"需求探詢",education:"衛教說明",options:"方案與費用",objection:"顧慮處理",close:"促成決定",ethics:"專業倫理"};
 const DECNAME={accept:"接受建議",think:"回家考慮",decline:"婉拒",none:"尚未決定",痊癒:"痊癒",未痊癒:"未痊癒"};
+function practiceEvidBox(){
+  const cond=findCond(S.c.dx);
+  const said=S.turns.filter(t=>t.role==="therapist").map(t=>t.text).join("\n");
+  const items=matchTx(cond,said);
+  if(!cond) return `<div class="box" style="border:1px solid var(--line);margin-bottom:18px"><h3>實證查核</h3><p class="muted" style="margin:0">「${esc(S.c.dx)}」不在內建實證資料庫，請自行查證你建議的治療。</p></div>`;
+  return `<div class="box" style="border:1px solid var(--line);margin-bottom:18px"><h3>實證查核：你在對話中提到的治療</h3>
+    ${items.length?`<table class="evtab">${items.map(it=>`<tr><td>${esc(it.tx)}</td><td>${evBadge(it)} ${it.note?esc(it.note):""}</td></tr>`).join("")}</table>`:`<p class="muted">對話中沒有提到具體的治療項目。好的說明應該讓病人知道你建議做什麼、為什麼。</p>`}
+    <p class="muted" style="font-size:13px;margin:0">${esc(cond.name)}的依據：${evSrcLink(cond)}</p></div>`;
+}
 function renderReport(r){
   const dims=r.dims||{};
   const list=a=>(Array.isArray(a)&&a.length)?`<ul>${a.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:`<p class="muted">無</p>`;
@@ -1073,6 +1133,7 @@ function renderReport(r){
     <div class="dims">${Object.keys(DIMNAME).map(k=>{const d=dims[k]||{};const s=Math.max(0,Math.min(5,+d.score||0));return `
       <div class="dim ${k==='ethics'&&s<=2?'flag':''}"><span>${DIMNAME[k]}</span><span class="bar"><i style="width:${s*20}%"></i></span><b>${s}</b><small>${esc(d.note||"")}</small></div>`}).join("")}</div>
     ${(r.risks&&r.risks.length)?`<div class="box risk"><h3>要注意的風險</h3>${list(r.risks)}</div>`:""}
+    ${practiceEvidBox()}
     <div class="two"><div class="box good"><h3>做得好的地方</h3>${list(r.strengths)}</div><div class="box fix"><h3>可以更好的地方</h3>${list(r.improve)}</div></div>
     <h3 style="margin:0 0 10px">換個說法試試</h3>
     ${(r.rewrites||[]).map(w=>`<div class="rewrite"><div class="was">${esc(w.original)}</div><div class="now">「${esc(w.better)}」</div><div class="why">${esc(w.why)}</div></div>`).join("")}
@@ -1131,18 +1192,30 @@ ${priceText()}
 7. opener 是病人坐下後說的第一句話，30 到 60 字，可以用括號描述動作，帶出主訴但不要透露全部顧慮。
 
 只回傳一個 JSON 物件：
-{"name":"","gender":"男或女","age":整數,"job":"職業與工作型態","dx":"診斷","dur":"病程","tried":"已做過的治療","chief":"主訴","goal":"","concerns":["",""],"fit":"","hook":"能打動他的關鍵","personality":"個性與說話風格","visit":"第一次來診所 或 是第幾次回診","opener":"","note":""}`;
+{"name":"","gender":"男或女","age":整數,"job":"職業與工作型態","dx":"診斷","dur":"病程","tried":"已做過的治療","chief":"主訴","goal":"","concerns":["",""],"fit":"","hook":"能打動他的關鍵","personality":"個性與說話風格","visit":"第一次來診所 或 是第幾次回診","opener":"","note":"","look":"English only, 1 to 2 sentences describing visible appearance for a portrait photo: hairstyle and hair color, face shape, build, skin, glasses or not, clothing that fits the job, and a facial expression that fits the personality and pain. No names."}`;
 }
 const B_FIELDS=[
   ["name","名字"],["gender","性別"],["age","年齡"],["job","職業"],["dx","診斷"],["dur","病程"],["tried","已做過的治療"],["chief","主訴"],
   ["personality","個性與說話風格"],["goal","內心真正的目標（不會主動說）"],["concerns","沒說出口的顧慮（一行一個）"],["fit","最適合的方案"],
-  ["hook","能打動他的關鍵"],["visit","就診情境"],["opener","開場白"]
+  ["hook","能打動他的關鍵"],["visit","就診情境"],["opener","開場白"],["look","外觀描述（英文，給照片生成用）"]
 ];
+const PENDING_IMG={};
+function startPortraitEarly(d){
+  if(!RELAY||d.img) return;
+  const id=d.id;
+  PENDING_IMG[id]=genPortrait(d).then(img=>{
+    const c=CUSTOM.find(x=>x.id===id); if(c&&!c.img){ c.img=img; saveCustom(); renderCases(); }
+    if(DRAFT&&DRAFT.id===id){ DRAFT.img=img; const ph=document.getElementById("bPhoto"); if(ph) ph.innerHTML=`<img src="${img}" alt="病人照片" style="width:100%;height:100%;object-fit:cover">`; }
+    return img;
+  }).catch(e=>{ const ph=document.getElementById("bPhoto"); if(ph&&DRAFT&&DRAFT.id===id) ph.textContent="照片生成失敗，開始演練時會再試一次"; delete PENDING_IMG[id]; throw e; });
+}
 function renderDraft(){
   const d=DRAFT;
-  const long=new Set(["tried","goal","concerns","fit","hook","personality","opener","chief"]);
+  const long=new Set(["tried","goal","concerns","fit","hook","personality","opener","chief","look"]);
   $("#bPreview").innerHTML = `<h3 style="margin:0;font-size:17px">AI 建構的人設（可直接修改）</h3>` +
+    `<div id="bPhoto" style="width:180px;aspect-ratio:1/1;border-radius:14px;overflow:hidden;background:var(--surface-2);display:grid;place-items:center;font-size:13px;color:var(--ink-2);text-align:center;padding:${d.img?0:8}px">${d.img?`<img src="${d.img}" alt="病人照片" style="width:100%;height:100%;object-fit:cover">`:(RELAY?"正在生成病人照片……":"未連接中繼服務，無法生成照片")}</div>` +
     (d.note?`<div class="note" style="background:var(--amber-soft);border-radius:10px;padding:8px 12px;font-size:13.5px">AI 調整說明：${esc(d.note)}</div>`:"") +
+    (()=>{ const c=findCond(d.dx); return c?`<div class="note" style="background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:13.5px"><b>實證對照｜${esc(c.name)}</b><br>${c.items.map(it=>`${evBadge(it)} ${esc(it.tx)}`).join("<br>")}<br><span class="muted" style="font-size:12px">${evSrcLink(c)}</span></div>`:`<p class="muted" style="font-size:13px;margin:0">此診斷不在內建實證資料庫，「最適合的方案」由 AI 判斷，請自行查證。</p>`; })() +
     `<div class="grid2">` + B_FIELDS.map(([k,l])=>{
       const v = k==="concerns" ? (d.concerns||[]).join("\n") : (d[k]??"");
       const full = long.has(k);
@@ -1156,7 +1229,7 @@ function renderDraft(){
   $("#bPreview").hidden=false;
   $("#bStart").addEventListener("click",()=>{ const c=commitDraft(); if(c){ $("#bPreview").hidden=true; startSession(c.id); } });
   $("#bSave").addEventListener("click",()=>{ if(commitDraft()){ $("#bPreview").hidden=true; $("#cMsg").textContent="已儲存到下方清單。"; } });
-  $("#bRedo").addEventListener("click",()=>buildCase(false));
+  $("#bRedo").addEventListener("click",()=>buildCase(false));   // 重新產生會建立新的人設與新照片
   $("#bPreview").scrollIntoView({behavior:"smooth",block:"start"});
 }
 function commitDraft(){
@@ -1168,6 +1241,7 @@ function commitDraft(){
   d.init=String(d.name).slice(0,1);
   d.diff=$("#cDiff").value;
   d.id=DRAFT.id||("c"+Date.now().toString(36));
+  if(DRAFT.img) d.img=DRAFT.img;
   const i=CUSTOM.findIndex(x=>x.id===d.id);
   if(i>=0) CUSTOM[i]=d; else CUSTOM.push(d);
   saveCustom(); renderCases();
@@ -1180,9 +1254,9 @@ async function buildCase(quick){
   try{
     const r=await aiJSON(builderPrompt(composerText(readComposer("c")),$("#cFocus").value,$("#cDiff").value),{temperature:0.9,maxTokens:4096});
     if(!r||!r.name) throw {code:"parse"};
-    DRAFT={...r, id:undefined};
+    DRAFT={...r, id:"c"+Date.now().toString(36)};
+    startPortraitEarly(DRAFT);                 // 人設一建立就同時開始生成照片
     if(quick){
-      DRAFT.id="c"+Date.now().toString(36);
       const c={...DRAFT,init:String(r.name).slice(0,1),diff:$("#cDiff").value,concerns:Array.isArray(r.concerns)?r.concerns:[]};
       CUSTOM.push(c); saveCustom(); renderCases();
       $("#cMsg").textContent=r.note?`AI 調整：${r.note}`:"";
@@ -1196,6 +1270,148 @@ async function buildCase(quick){
 }
 $("#cBuild").addEventListener("click",()=>buildCase(false));
 $("#cQuick").addEventListener("click",()=>buildCase(true));
+
+/* =================== 實證資料庫（整理自臨床指引，2026-10-09） =================== */
+const EV_DATE="2026-10-09";
+const EV_SRC={
+  heel:{t:"Koc 等，Heel Pain–Plantar Fasciitis: Revision 2023，JOSPT 2023;53(12)",u:"https://www.orthopt.org/uploads/content_files/files/Heel_Pain_Plantar_Fasciitis_Revision_2023.pdf"},
+  elbow:{t:"Lucado 等，Lateral Elbow Pain and Muscle Function Impairments，JOSPT 2022",u:"https://www.orthopt.org/uploads/content_files/files/jospt.2022.0302.pdf"},
+  lbp:{t:"George 等，Interventions for Acute and Chronic Low Back Pain: Revision 2021，JOSPT 2021;51(11)",u:"https://www.orthopt.org/uploads/content_files/files/jospt.2021.0304.pdf"},
+  neck:{t:"Blanpied 等，Neck Pain: Revision 2017，JOSPT 2017;47(7)",u:"https://www.orthopt.org/uploads/content_files/files/Neck_Pain_Revision_2017%282%29.pdf"},
+  achilles:{t:"Midportion Achilles Tendinopathy Revision 2024，JOSPT 2024",u:"https://www.orthopt.org/uploads/content_files/files/Achilles_Pain_revision_2024.pdf"},
+  rc:{t:"Rotator Cuff Tendinopathy CPG，JOSPT 2025（依 Physiotutors 摘要整理）",u:"https://www.physiotutors.com/rotator-cuff-tendinopathy-the-new-2025-clinical-practice-guideline/"},
+  frozen:{t:"Kelley 等，Shoulder Pain and Mobility Deficits: Adhesive Capsulitis，JOSPT 2013;43(5)",u:"https://www.orthopt.org/uploads/content_files/ICF/Updated_Guidelines/Shoulder_Guidelines_AdhesiveCapsulitis_JOSPT_May_2013.pdf"},
+  knee:{t:"2019 ACR/Arthritis Foundation 手、髖、膝骨關節炎指引（The Rheumatologist 摘要）",u:"https://www.the-rheumatologist.org/article/beyond-drugs-acr-af-guideline-update-for-hand-knee-hip-oa-emphasizes-exercise/3"},
+  eswt:{t:"Daman 保險 ESWT 肌肉骨骼適應症給付政策（2026）",u:"https://www.damaninsurance.ae/wp-content/uploads/2026/06/Extracorporeal-Shockwave-Therapy-in-Musculoskeletal-Indications-External-16062026.pdf"}
+};
+const KW={
+  manual:["徒手","關節鬆動","鬆動術","操作術","軟組織","筋膜放鬆","按摩","MET","肌肉能量","激痛點治療","manual","mobiliz"],
+  stretch:["伸展","拉筋","stretch"],
+  exercise:["運動治療","肌力","阻力","離心","向心","等長","負荷訓練","核心","穩定訓練","耐力","有氧","居家運動","強化","訓練"],
+  tape:["貼紮","貼布","肌貼","tap"],
+  needle:["乾針","dry needl"],
+  laser:["雷射","laser"],
+  us:["超音波","ultrasound"],
+  estim:["電療","TENS","電刺激","干擾波","離子導入"],
+  ionto:["離子導入","ionto"],
+  eswt:["震波","ESWT","shock"],
+  traction:["牽引","traction"],
+  edu:["衛教","疼痛科學","說明病情","教育"],
+  orth:["鞋墊","矯具","足弓墊","orthos"],
+  brace:["護具","護套","護膝","支架","brace"],
+  heat:["熱敷","熱療","紅外線","冰敷","冰療"],
+  inject:["類固醇","注射","打針"]
+};
+const EVID=[
+ {id:"frozen",name:"沾黏性肩關節囊炎（五十肩）",keys:["五十肩","沾黏","冰凍肩","肩關節囊炎","frozen","adhesive"],src:"frozen",items:[
+   {tx:"類固醇注射（醫師執行，需轉介）",k:KW.inject,g:"A",d:"建議"},
+   {tx:"病人衛教",k:KW.edu,g:"B",d:"建議"},
+   {tx:"伸展運動",k:KW.stretch,g:"B",d:"建議"},
+   {tx:"關節鬆動術",k:["關節鬆動","鬆動術","徒手"],g:"C",d:"可考慮"},
+   {tx:"物理因子（短波、超音波、電刺激）",k:[...KW.us,...KW.estim,"短波"],g:"C",d:"可考慮"},
+   {tx:"體外震波",k:KW.eswt,g:"—",d:"非指引項目",note:"本指引未納入震波，五十肩也不在常見震波給付適應症之列。"}]},
+ {id:"rc",name:"旋轉肌腱病變（含鈣化性肌腱炎、肩夾擠）",keys:["旋轉肌","夾擠","棘上肌","鈣化性肌腱","鈣化性","肩峰下","rotator","肩膀鈣化"],src:"rc",items:[
+   {tx:"運動治療（漸進阻力與動作控制）",k:KW.exercise,g:"A",d:"建議",note:"核心處置"},
+   {tx:"徒手治療（合併運動）",k:KW.manual,g:"B",d:"建議",note:"短期止痛"},
+   {tx:"體外震波",k:KW.eswt,g:"C",d:"可考慮（限鈣化性）",note:"鈣化性肌腱炎可考慮；非鈣化性不建議。"},
+   {tx:"類固醇注射（醫師）",k:KW.inject,g:"B/C",d:"可考慮",note:"僅短期止痛，不是第一線"},
+   {tx:"治療性超音波",k:KW.us,g:"C/B",d:"不建議"},
+   {tx:"雷射",k:KW.laser,g:"C",d:"可考慮（鈣化性）"},
+   {tx:"貼紮",k:KW.tape,g:"D",d:"證據矛盾",note:"可作為短期輔助"},
+   {tx:"衛教與自我管理",k:KW.edu,g:"C",d:"可考慮"}]},
+ {id:"heel",name:"足底筋膜炎／足跟痛",keys:["足底筋膜","足跟痛","腳跟痛","足底痛","跟骨骨刺","plantar","heel"],src:"heel",items:[
+   {tx:"徒手治療（下肢關節與軟組織）",k:KW.manual,g:"A",d:"建議"},
+   {tx:"足底筋膜與小腿伸展",k:KW.stretch,g:"A",d:"建議"},
+   {tx:"貼紮（剛性或彈性）",k:KW.tape,g:"A",d:"建議",note:"搭配其他治療，短期止痛與改善功能"},
+   {tx:"夜間副木",k:["夜間副木","夜間支架","night splint"],g:"A",d:"建議",note:"早上第一步痛者使用 1 到 3 個月"},
+   {tx:"足部矯具／鞋墊",k:KW.orth,g:"B",d:"不建議單獨使用",note:"不宜單獨用於短期止痛；與其他治療合併可考慮（C）"},
+   {tx:"乾針",k:KW.needle,g:"B",d:"建議"},
+   {tx:"低能量雷射",k:KW.laser,g:"B",d:"建議"},
+   {tx:"足踝肌力訓練",k:KW.exercise,g:"C",d:"可考慮"},
+   {tx:"超音波（用來增強伸展效果）",k:KW.us,g:"A",d:"不建議"},
+   {tx:"電療（含離子導入）",k:KW.estim,g:"D",d:"第二線",note:"應優先使用徒手、伸展與矯具"},
+   {tx:"衛教（體重管理）",k:["體重","減重"],g:"E",d:"可考慮"},
+   {tx:"體外震波",k:KW.eswt,g:"—",d:"本指引未評等",note:"2023 版指引認為震波不屬於物理治療師執業範圍而未評等；保險給付政策將「保守治療 6 個月無效的慢性足底筋膜炎」列為震波適應症。"}]},
+ {id:"achilles",name:"中段阿基里斯腱病變",keys:["阿基里斯","跟腱","achilles"],src:"achilles",items:[
+   {tx:"肌腱負荷訓練",k:KW.exercise,g:"A",d:"建議",note:"第一線，在可忍受範圍內盡量加重，每週至少 3 次（E）"},
+   {tx:"衛教（疼痛科學或結構觀點）",k:KW.edu,g:"B",d:"建議"},
+   {tx:"離子導入（Dexamethasone，急性期）",k:KW.ionto,g:"B",d:"建議（急性期）"},
+   {tx:"小腿伸展",k:KW.stretch,g:"C",d:"可考慮",note:"背屈受限時"},
+   {tx:"足跟墊",k:["足跟墊","heel lift"],g:"C",d:"可考慮（暫時）"},
+   {tx:"矯具",k:KW.orth,g:"D",d:"證據矛盾"},
+   {tx:"貼紮",k:KW.tape,g:"E",d:"可考慮"},
+   {tx:"徒手治療",k:KW.manual,g:"F",d:"可考慮（專家意見）"},
+   {tx:"乾針",k:KW.needle,g:"F",d:"可考慮（專家意見）"},
+   {tx:"低能量雷射",k:KW.laser,g:"C",d:"不建議"},
+   {tx:"治療性超音波",k:KW.us,g:"C",d:"不建議單獨使用"},
+   {tx:"體外震波",k:KW.eswt,g:"—",d:"本指引未評等",note:"2024 版認為震波不屬物理治療師執業範圍而未評等。"}]},
+ {id:"elbow",name:"外側肘痛（網球肘）",keys:["網球肘","外側肘","外上髁","肘外側","lateral epicond","tennis elbow"],src:"elbow",items:[
+   {tx:"腕伸肌阻力訓練（等長、向心或離心）",k:KW.exercise,g:"B",d:"建議",note:"亞急性或慢性；高需求者採階段式負荷（F）"},
+   {tx:"肘關節鬆動／操作",k:["關節鬆動","鬆動術","操作術","徒手"],g:"B",d:"建議"},
+   {tx:"軟組織鬆動",k:["軟組織","筋膜放鬆","按摩","激痛點"],g:"C",d:"可考慮"},
+   {tx:"乾針（肌腱或激痛點）",k:KW.needle,g:"B",d:"建議"},
+   {tx:"剛性貼紮",k:KW.tape,g:"B",d:"建議",note:"高激惹時短期止痛；肌貼為 C"},
+   {tx:"雷射",k:KW.laser,g:"C",d:"可考慮"},
+   {tx:"TENS",k:["TENS","電療","電刺激"],g:"C",d:"可考慮",note:"短期止痛"},
+   {tx:"離子導入（早期高激惹）",k:KW.ionto,g:"C",d:"可考慮"},
+   {tx:"反作用力護套",k:KW.brace,g:"F",d:"可考慮（活動時）",note:"中長期效果證據矛盾（D）"},
+   {tx:"超音波（單獨使用）",k:KW.us,g:"D",d:"證據矛盾"},
+   {tx:"衛教與人體工學",k:KW.edu,g:"E",d:"可考慮"},
+   {tx:"體外震波",k:KW.eswt,g:"—",d:"本指引未納入",note:"保險給付政策將「保守治療 6 個月無效的慢性外上髁炎」列為震波適應症。"}]},
+ {id:"lbp",name:"下背痛（急性／慢性）",keys:["下背","腰痛","腰椎","坐骨神經","閃到腰","low back","lbp"],src:"lbp",items:[
+   {tx:"運動治療（肌力、耐力、多元、有氧、水中）",k:KW.exercise,g:"A",d:"建議",note:"慢性下背痛；急性為 C，合併腿痛為 B"},
+   {tx:"關節鬆動／操作",k:["關節鬆動","鬆動術","操作術","整脊","徒手"],g:"A",d:"建議",note:"慢性合併腿痛為 B"},
+   {tx:"疼痛神經科學衛教（搭配其他治療）",k:KW.edu,g:"A",d:"建議",note:"單獨衛教不建議作為唯一治療"},
+   {tx:"軟組織鬆動／按摩（搭配其他治療）",k:["軟組織","筋膜放鬆","按摩"],g:"B",d:"建議"},
+   {tx:"神經鬆動（合併腿痛）",k:["神經鬆動"],g:"B",d:"建議"},
+   {tx:"乾針（搭配其他治療）",k:KW.needle,g:"C",d:"可考慮"},
+   {tx:"機械牽引（慢性合併腿痛）",k:KW.traction,g:"D",d:"不建議"},
+   {tx:"體外震波",k:KW.eswt,g:"—",d:"非指引項目",note:"本指引未納入震波，下背痛也不在常見震波給付適應症之列。"}]},
+ {id:"neck",name:"頸痛（含頸因性頭痛、神經根性疼痛）",keys:["頸痛","頸部","脖子","落枕","頸椎","揮鞭","頸因性","肩頸","neck"],src:"neck",items:[
+   {tx:"胸椎與頸椎關節鬆動／操作",k:["關節鬆動","鬆動術","操作術","徒手"],g:"B",d:"建議",note:"急性頸椎為 C"},
+   {tx:"運動（頸部與肩帶的耐力、肌力、伸展、協調）",k:KW.exercise,g:"B",d:"建議"},
+   {tx:"衛教與保持活動",k:KW.edu,g:"B",d:"建議"},
+   {tx:"間歇性頸椎牽引（慢性，合併運動與鬆動）",k:KW.traction,g:"B",d:"建議"},
+   {tx:"乾針（慢性活動受限）",k:KW.needle,g:"B",d:"建議"},
+   {tx:"雷射",k:KW.laser,g:"B",d:"可考慮",note:"慢性活動受限為 B；急性神經根性為 C"},
+   {tx:"TENS（揮鞭傷）",k:["TENS","電療","電刺激"],g:"C",d:"可考慮"},
+   {tx:"體外震波",k:KW.eswt,g:"—",d:"非指引項目",note:"本指引未納入震波。"}]},
+ {id:"knee",name:"膝退化性關節炎",keys:["膝退化","退化性關節炎","膝關節炎","骨關節炎","骨性關節炎","knee oa","osteoarthritis"],src:"knee",items:[
+   {tx:"運動治療",k:KW.exercise,g:"強",d:"強烈建議"},
+   {tx:"體重控制（過重者）",k:["體重","減重"],g:"強",d:"強烈建議"},
+   {tx:"脛股關節護膝",k:KW.brace,g:"強",d:"強烈建議"},
+   {tx:"TENS 電療",k:["TENS","電療","電刺激"],g:"強",d:"強烈不建議"},
+   {tx:"徒手治療（合併運動）",k:KW.manual,g:"有條件",d:"不建議（有條件）"},
+   {tx:"按摩",k:["按摩"],g:"有條件",d:"不建議（有條件）"},
+   {tx:"楔形鞋墊、改良鞋",k:KW.orth,g:"有條件",d:"不建議（有條件）"},
+   {tx:"體外震波",k:KW.eswt,g:"—",d:"非指引項目",note:"本指引未納入震波。"}]}
+];
+const ESWT_NOTE="常見震波給付適應症（保守治療 6 個月無效）：外上髁炎、足底筋膜炎／跟骨骨刺、肩部鈣化性肌腱炎、髖部大轉子疼痛。常見禁忌或需謹慎：懷孕、心律調節器或心臟支架、腫瘤、感染、生長板未閉合、骨質疏鬆、類風濕性關節炎、糖尿病。台灣物理治療師能否執行震波，請依衛福部與公會的最新規定確認。";
+function findCond(text){
+  const t=String(text||"").toLowerCase(); if(!t) return null;
+  return EVID.find(c=>c.keys.some(k=>t.includes(k.toLowerCase())))||null;
+}
+function matchTx(cond,text){
+  const t=String(text||"").toLowerCase(); if(!cond||!t) return [];
+  return cond.items.filter(it=>it.k.some(k=>t.includes(k.toLowerCase())));
+}
+function evCls(d){ return /不建議|不要/.test(d)?"bad":/^強烈建議|^建議/.test(d)?"good":/可考慮|第二線/.test(d)?"mid":"na"; }
+function evBadge(it){ return `<span class="ev ${evCls(it.d)}">${esc(it.d)}${it.g&&it.g!=="—"?`｜${esc(it.g)}`:""}</span>`; }
+function evSrcLink(cond){ const s=EV_SRC[cond.src]; return `<a href="${s.u}" target="_blank" rel="noopener">${esc(s.t)}</a>`; }
+function evidText(cond){
+  if(!cond) return "";
+  return `【${cond.name}】來源：${EV_SRC[cond.src].t}\n`+cond.items.map(it=>`- ${it.tx}：${it.d}（等級 ${it.g}）${it.note?"；"+it.note:""}`).join("\n");
+}
+function evidCardHTML(cond,items,dxLabel){
+  if(!dxLabel) return `<b>實證查核</b>尚未下工作診斷，先選「診斷」送出，系統才能比對這項處置的實證等級。`;
+  if(!cond) return `<b>實證查核</b>「${esc(dxLabel)}」不在內建實證資料庫（目前收錄 ${EVID.length} 種常見診斷），請自行查證此處置的依據。`;
+  if(!items.length) return `<b>實證查核｜${esc(cond.name)}</b>沒有在指引中找到這項處置的建議，可能是指引未涵蓋，請自行查證。<br><span class="muted">${evSrcLink(cond)}</span>`;
+  return `<b>實證查核｜${esc(cond.name)}</b>`+items.map(it=>`<div class="evrow">${evBadge(it)} ${esc(it.tx)}${it.note?`<span class="muted">：${esc(it.note)}</span>`:""}</div>`).join("")+`<span class="muted" style="font-size:12px">來源：${evSrcLink(cond)}</span>`;
+}
+function addEvidCard(log,html){
+  const d=document.createElement("div"); d.className="msg evid"; d.innerHTML=html;
+  log.appendChild(d); log.scrollTop=log.scrollHeight;
+}
 
 /* =================== CLINIC SIM =================== */
 const K_ASK={
@@ -1307,16 +1523,17 @@ ${composerText(readComposer("k"))}
 名字用台灣常見姓氏加上符合性別與年齡的稱謂。病人的個性要反映在說話方式。
 難度：${$("#kLevel").value}
 要求：真實診斷要能透過問診與理學檢查推得；bestPlan 要依實證，寫清楚各階段（急性期、修復期、回歸功能）重點，並說明自費項目是否適合；不要包含真實個人資料。
-只回傳 JSON：{"name":"","gender":"男或女","age":整數,"job":"","personality":"個性與說話風格","note":"","chief":"病人自述的主訴","opener":"病人坐下說的第一句話 30 到 60 字","pain":0到10整數,"func":0到100整數（目前功能）,"hidden":{"dx":"真正診斷","history":"關鍵病史線索","findings":"各項理學檢查應有的結果，含陽性與陰性","redFlags":"紅旗徵象，沒有就寫無","bestPlan":"","visits":整數}}`;
+只回傳 JSON：{"name":"","gender":"男或女","age":整數,"job":"","personality":"個性與說話風格","note":"","look":"English only, 1 to 2 sentences describing visible appearance for a portrait photo (hair, face, build, clothing, expression)","chief":"病人自述的主訴","opener":"病人坐下說的第一句話 30 到 60 字","pain":0到10整數,"func":0到100整數（目前功能）,"hidden":{"dx":"真正診斷","history":"關鍵病史線索","findings":"各項理學檢查應有的結果，含陽性與陰性","redFlags":"紅旗徵象，沒有就寫無","bestPlan":"","visits":整數}}`;
   try{
     const r=await aiJSON(p,{temperature:0.9,maxTokens:4096});
     if(!r||!r.name||!r.hidden) throw {code:"parse"};
-    K={c:{name:r.name,gender:r.gender,age:r.age,job:r.job,chief:r.chief,personality:r.personality},h:r.hidden,level:$("#kLevel").value,
+    K={c:{name:r.name,gender:r.gender,age:r.age,job:r.job,chief:r.chief,personality:r.personality,look:r.look||(src&&src.look)||"",img:src&&src.img},h:r.hidden,level:$("#kLevel").value,
        pain:+r.pain||5,func:+r.func||40,sat:60,visit:1,day:1,cost:0,myDx:"",turns:[],summaries:[],busy:false,done:false};
     $("#kPick").hidden=true; $("#kReport").hidden=true; $("#kSession").hidden=false;
     $("#kTitle").textContent=`${r.name}的臨床模擬`;
     $("#kLog").innerHTML=""; kSide();
     kAdd("sys","第 1 次就診（初診）。先問診和做檢查，再下診斷與安排治療。");
+    showPortrait(avatarK(), K.c, ()=>{ if(src){ src.img=K.c.img; saveCustom(); renderCases(); } });
     kAdd("pt", r.opener||r.chief); K.turns.push({k:"病人",t:r.opener||r.chief});
     $("#kMsg").textContent="";
     if(r.note) kAdd("sys",`AI 調整說明：${r.note}`);
@@ -1330,9 +1547,21 @@ async function kSendAct(){
   $("#kInput").value="";
   kAdd("me",txt,type); K.turns.push({k:"治療師-"+type,t:txt});
   if(type==="診斷"){ K.myDx=txt; }
+  const isTx=/治療|居家運動/.test(type);
+  let evPrompt="";
+  if(isTx){
+    const cond=findCond(K.myDx), items=matchTx(cond,txt);
+    addEvidCard($("#kLog"), evidCardHTML(cond,items,K.myDx));
+    (K.evLog=K.evLog||[]).push({visit:K.visit,tx:txt,cond:cond&&cond.name,items:items.map(i=>`${i.tx}：${i.d}（${i.g}）`)});
+    const real=findCond(K.h.dx);
+    evPrompt=`
+實證參考（判斷這項處置是否適當、是否給 warning 時必須依據；不可說出隱藏診斷名稱）：
+${real?evidText(real):"真正診斷不在內建資料庫，依一般臨床實證判斷。"}
+`;
+  }
   kBusy(true);
   const p=`${kBase()}
-
+${evPrompt}
 治療師剛剛的動作：【${type}】${txt}
 
 請依動作類型回應：
@@ -1367,7 +1596,7 @@ $("#kHint").addEventListener("click", async()=>{
 治療師目前的工作診斷：${K.myDx||"尚未下診斷"}。目前疼痛 ${K.pain}/10，功能 ${K.func}%。
 ${kTranscript()}
 
-教學原則：你看不到病人真正的診斷，也不可以猜測後直接說出答案；只能根據上面治療師已經問到、查到的資訊做臨床推理。像蘇格拉底式教學一樣，給方向、給理由、指出還缺什麼證據。提到特殊測試時，可簡述其臨床意義。
+${(()=>{ const c=findCond(K.myDx); return c?`依治療師工作診斷的實證資料（建議治療時要依此並註明等級）：\n${evidText(c)}\n`:""; })()}教學原則：你看不到病人真正的診斷，也不可以猜測後直接說出答案；只能根據上面治療師已經問到、查到的資訊做臨床推理。像蘇格拉底式教學一樣，給方向、給理由、指出還缺什麼證據。提到特殊測試時，可簡述其臨床意義。
 治療師想知道：${q}
 只回傳 JSON：{"hint":"120 字內的具體建議，可分點用「；」隔開","next":"一個建議下一步可以直接做的動作，例如『做 Hawkins-Kennedy test』或『詢問夜間痛』"}`;
   try{
@@ -1404,6 +1633,14 @@ $("#kNext").addEventListener("click", async()=>{
   }catch(e){ kAdd("sys",errFull(e)); }
   finally{ kBusy(false); }
 });
+function kEvidBox(r){
+  const real=findCond(K.h.dx);
+  const rows=(Array.isArray(r.evidence)?r.evidence:[]).map(e=>{ const cls=/不建議/.test(e.verdict||"")?"bad":/有實證/.test(e.verdict||"")?"good":/有限|可考慮/.test(e.verdict||"")?"mid":"na";
+    return `<tr><td>${esc(e.tx)}</td><td><span class="ev ${cls}">${esc(e.verdict||"")}</span> ${esc(e.why||"")}<br><span class="muted" style="font-size:12px">${esc(e.source||"")}</span></td></tr>`; }).join("");
+  return `<div class="box" style="border:1px solid var(--line);margin-bottom:18px"><h3>實證查核：你選的治療有沒有醫療依據</h3>
+    ${rows?`<table class="evtab">${rows}</table>`:`<p class="muted">這次療程沒有治療紀錄。</p>`}
+    ${real?`<p class="muted" style="font-size:13px;margin:0">依據：${evSrcLink(real)}</p>`:`<p class="muted" style="font-size:13px;margin:0">真正診斷不在內建實證資料庫，以上由 AI 依一般實證判斷，請自行查證。</p>`}</div>`;
+}
 $("#kQuit").addEventListener("click",()=>{ K=null; $("#kSession").hidden=true; $("#kReport").hidden=true; $("#kPick").hidden=false; kSources(); });
 $("#kEnd").addEventListener("click", async()=>{
   if(!K||K.busy) return;
@@ -1413,10 +1650,14 @@ $("#kEnd").addEventListener("click", async()=>{
   const p=`${kBase()}
 
 療程結束。最後狀態：第 ${K.visit} 次就診、第 ${K.day} 天、疼痛 ${K.pain}/10、功能 ${K.func}%、滿意度 ${K.sat}、自費累計 NT$${K.cost}。
+${(()=>{ const real=findCond(K.h.dx), mine=findCond(K.myDx); return `實證參考資料（評 treatment 與 value 時必須依據這些指引，並在 evidence 中逐項說明治療師用過的處置是否有依據、引用來源名稱；不在資料內的處置要標註「資料庫未涵蓋，依一般實證判斷」）：
+${real?evidText(real):"真正診斷不在內建實證資料庫。"}${mine&&mine!==real?"\n（治療師的工作診斷對應）\n"+evidText(mine):""}`; })()}
+治療師做過的治療與系統比對：
+${(K.evLog||[]).map(e=>`第${e.visit}次：${e.tx} → ${e.items.length?e.items.join("、"):"未比對到"}`).join("\n")||"（沒有治療紀錄）"}
 請以資深物理治療臨床教師身分評分，用台灣繁體中文。七個面向各 1 到 5 分：
 assessment 問診與檢查完整度、diagnosis 診斷正確性、treatment 治療選擇符合實證、progression 療程進階與居家運動、safety 安全與紅旗處理、communication 溝通與衛教、value 自費使用是否恰當與效率（就診次數）。
 另給 0 到 100 總分。
-只回傳 JSON：{"total":整數,"truth":"揭曉真正診斷與關鍵線索","summary":"兩句總評","dims":{"assessment":{"score":整數,"note":""},"diagnosis":{},"treatment":{},"progression":{},"safety":{},"communication":{},"value":{}},"strengths":["最多3點"],"improve":["最多3點"],"ideal":"理想療程的簡要路徑，3 到 5 句"}`;
+只回傳 JSON：{"total":整數,"truth":"揭曉真正診斷與關鍵線索","summary":"兩句總評","dims":{"assessment":{"score":整數,"note":""},"diagnosis":{},"treatment":{},"progression":{},"safety":{},"communication":{},"value":{}},"strengths":["最多3點"],"improve":["最多3點"],"ideal":"理想療程的簡要路徑，3 到 5 句","evidence":[{"tx":"治療師用過的處置","verdict":"有實證支持／證據有限／不建議／資料庫未涵蓋","why":"一句說明與等級","source":"來源名稱"}]}`;
   try{
     const r=await aiJSON(p,{temperature:0.3,maxTokens:8192});
     const N={assessment:"問診與檢查",diagnosis:"診斷正確性",treatment:"治療選擇",progression:"療程進階",safety:"安全與紅旗",communication:"溝通衛教",value:"自費與效率"};
@@ -1429,6 +1670,7 @@ assessment 問診與檢查完整度、diagnosis 診斷正確性、treatment 治�
       <p style="font-family:var(--hand);font-size:18px">${esc(r.summary||"")}</p>
       <div class="dims">${Object.keys(N).map(k=>{const d=(r.dims||{})[k]||{};const v=Math.max(0,Math.min(5,+d.score||0));return `<div class="dim ${k==='safety'&&v<=2?'flag':''}"><span>${N[k]}</span><span class="bar"><i style="width:${v*20}%"></i></span><b>${v}</b><small>${esc(d.note||"")}</small></div>`}).join("")}</div>
       <div class="two"><div class="box good"><h3>做得好的地方</h3>${list(r.strengths)}</div><div class="box fix"><h3>可以更好的地方</h3>${list(r.improve)}</div></div>
+      ${kEvidBox(r)}
       <p><b>理想療程：</b>${esc(r.ideal||K.h.bestPlan)}</p>
       <div class="actions"><button class="btn primary" id="kAgain">再看一位病人</button></div></div>`;
     HIST.push({d:new Date().toISOString(),who:K.c.name+"（臨床）",total:r.total,dec:K.func>=90?"痊癒":"未痊癒",weak:""}); saveHist();
@@ -1478,12 +1720,59 @@ $("#drillCheck").addEventListener("click", async()=>{
       <p style="margin:10px 0 4px"><b>做得好：</b>${esc(r.good)}</p>
       <p style="margin:0 0 8px"><b>可以改：</b>${esc(r.fix)}</p>
       <div class="say">${esc(r.better)}</div>
-      <details style="margin-top:8px"><summary class="muted" style="cursor:pointer">看話術庫的參考答案</summary><div class="say">${esc(o.a)}</div></details>`;
+      <details style="margin-top:8px"><summary class="muted" style="cursor:pointer">看專業溝通訓練的參考答案</summary><div class="say">${esc(o.a)}</div></details>`;
   }catch(e){ $("#drillResult").innerHTML=`<p class="muted">${esc(errCopy(e&&e.code))}</p>`; }
   finally{ drillBusy=false; $("#drillCheck").disabled=false; }
 });
 
 /* =================== LIBRARY =================== */
+
+/* =================== 各診斷說明腳本（依實證資料撰寫） =================== */
+const COND_SCRIPTS={
+  heel:{explain:"足底筋膜是從腳跟連到腳趾、撐住足弓的一條組織。久站或小腿太緊時，它在腳跟的附著處會反覆受力，所以早上下床第一步特別痛。",
+    plan:"研究最支持的是伸展足底和小腿、徒手放鬆，再加上貼紮；早上第一步很痛的話，可以用一到三個月的夜間副木。我們先從這些開始，回家每天做十分鐘伸展。",
+    self:"如果已經拖了半年以上、這些方法效果有限，可以和醫師討論體外震波，它是慢性足底筋膜炎常見的選項之一，但不是第一線，也要先確認沒有懷孕、凝血異常等禁忌。"},
+  elbow:{explain:"網球肘是前臂伸肌在手肘外側的肌腱，反覆用力後修復跟不上磨損，所以擰毛巾、提重物時會痛。",
+    plan:"研究支持的是腕部伸肌的漸進阻力訓練，加上手肘關節鬆動；痛得很厲害的時候，可以先用貼紮或護套撐過工作。",
+    self:"拖很久的慢性網球肘，震波是常見的選項之一，但最重要的還是把肌腱的承受力練回來，這部分一對一運動課程會比較有效率。"},
+  lbp:{explain:"大部分的下背痛不是結構壞掉，而是肌肉、關節和神經系統對負荷變得敏感。愈怕動，通常恢復得愈慢。",
+    plan:"實證最支持的是運動治療和關節鬆動，再加上疼痛科學衛教。我們會先找出你能舒服做的動作，再慢慢加量。",
+    self:"腰痛不建議做震波；長期合併腳麻的腰痛，指引也不建議用機械牽引。如果要自費，比較值得投資的是一對一運動課程。"},
+  neck:{explain:"長時間低頭會讓頸部深層肌肉耐力不夠，關節和周邊組織變緊、變敏感，有時還會牽到頭痛或手麻。",
+    plan:"指引建議頸椎和胸椎的關節鬆動，加上頸部與肩胛的耐力訓練；長期手麻的人可以搭配間歇性頸椎牽引。",
+    self:"頸痛的自費重點建議放在一對一運動與徒手治療，震波不是頸痛的建議處置。"},
+  achilles:{explain:"阿基里斯腱在反覆跑跳後承受不了負荷，結構變得比較脆弱，所以起步、爬坡時會痛。",
+    plan:"第一線是肌腱負荷訓練：在可以忍受的疼痛範圍內，每週至少三次，慢慢加重。單純休息不會讓肌腱變強。",
+    self:"震波在最新的阿基里斯腱指引中沒有評等，若要考慮，需要和醫師討論；負荷訓練才是一定要做的部分。"},
+  rc:{explain:"肩膀的旋轉肌腱承受的負荷超過它的能力，舉手、側睡時就會痛。如果 X 光看到鈣化，叫做鈣化性肌腱炎。",
+    plan:"核心治療是漸進式肩部肌力與動作控制訓練，徒手治療可以搭配，短期減輕疼痛。",
+    self:"只有鈣化性的旋轉肌腱炎，震波才有支持證據；沒有鈣化的話，指引不建議做震波，這點一定要跟病人說清楚。"},
+  frozen:{explain:"五十肩是肩關節囊發炎、變厚、變緊，通常會經歷疼痛期、僵硬期和解凍期，大約一到兩年慢慢恢復。",
+    plan:"實證較強的是衛教和伸展運動；疼痛期由醫師注射類固醇的證據最強，需要時我會建議你回診評估。關節鬆動可以搭配，但證據較弱。",
+    self:"五十肩不是震波的建議適應症。如果要自費，一對一的伸展與運動指導比較合適。"},
+  knee:{explain:"膝退化是關節軟骨和周邊組織慢慢磨損。大腿肌肉就像避震器，肌力愈好，膝蓋受的衝擊就愈小。",
+    plan:"最強烈建議的是運動和體重控制，必要時加上護膝。我們會設計你在家也能做的肌力訓練。",
+    self:"指引強烈不建議用電療（TENS）處理膝退化，震波也不是建議項目；如果要自費，建議投資在一對一運動課程。"}
+};
+let SCRIPTS=[];
+try{ const x=JSON.parse(localStorage.getItem("ptt-scripts")||"null"); if(Array.isArray(x)) SCRIPTS=x; }catch(e){}
+function saveScripts(){ try{ localStorage.setItem("ptt-scripts",JSON.stringify(SCRIPTS.slice(-40))); }catch(e){} }
+function scriptFlags(sc){
+  const cond=findCond(sc.dx); if(!cond) return [];
+  const all=(sc.steps||[]).flatMap(st=>st.lines||[]).join("\n");
+  return matchTx(cond,all).filter(it=>evCls(it.d)==="bad");
+}
+function scriptCard(sc,i){
+  const flags=scriptFlags(sc), cond=findCond(sc.dx);
+  return `<div class="script-card"><h3>${esc(sc.title||"溝通腳本")}<span class="tag">${esc(sc.type)}</span>${flags.length?`<span class="ev bad">實證警示</span>`:""}</h3>
+    <div class="meta">${esc(sc.dx)}${sc.pers?`｜病人個性：${esc(sc.pers)}`:""}｜${new Date(sc.d).toLocaleDateString("zh-TW")}</div>
+    ${flags.length?`<p class="avoid" style="margin:8px 0">腳本中提到了指引不建議的處置：${flags.map(f=>esc(f.tx)).join("、")}。使用前請修改。</p>`:""}
+    ${(sc.steps||[]).map(st=>`<div class="step" style="margin:12px 0"><h3>${esc(st.stage)}</h3><p class="aim">${esc(st.aim||"")}</p>${(st.lines||[]).map(x=>`<div class="say">${esc(x)}</div>`).join("")}${st.avoid?`<p class="avoid">${esc(st.avoid)}</p>`:""}</div>`).join("")}
+    ${(sc.evidence&&sc.evidence.length)?`<p style="font-size:13.5px;margin:6px 0"><b>引用的實證：</b>${sc.evidence.map(esc).join("；")}</p>`:""}
+    <p class="muted" style="font-size:12.5px;margin:4px 0">${cond?`實證依據：${evSrcLink(cond)}`:"此診斷不在內建實證資料庫，腳本內容請自行查證。"}</p>
+    <button class="btn" data-del-script="${i}" style="margin-top:6px">刪除</button></div>`;
+}
+
 let libSel="flow";
 function renderLib(){
   $("#libNav").innerHTML=Object.entries(LIB).map(([k,v])=>`<button data-k="${k}" aria-current="${k===libSel}">${v.title}</button>`).join("");
@@ -1492,6 +1781,37 @@ function renderLib(){
   if(libSel==="flow"){
     const f=LIB.flow;
     h=`<h2>${f.title}</h2><p class="lead">${f.lead}</p>`+f.steps.map((s,i)=>`<div class="step"><h3>${i+1}. ${s.t}</h3><p class="aim">${s.aim}</p>${s.say.map(x=>`<div class="say">${esc(x)}</div>`).join("")}<p class="avoid">${esc(s.avoid)}</p></div>`).join("");
+  }else if(libSel==="cond"){
+    h=`<h2>各診斷說明腳本</h2><p class="lead">依臨床指引撰寫的白話說明：病人聽得懂的解釋、有實證的方案，以及自費項目該怎麼誠實說。</p>`+
+      EVID.map(c=>{ const sc=COND_SCRIPTS[c.id]; return `<details class="obj"><summary>${esc(c.name)}</summary><div class="body">
+        <p class="why">白話解釋</p><div class="say">${esc(sc.explain)}</div>
+        <p class="why" style="margin-top:10px">方案說明</p><div class="say">${esc(sc.plan)}</div>
+        <p class="why" style="margin-top:10px">自費項目怎麼說</p><div class="say">${esc(sc.self)}</div>
+        <p class="muted" style="font-size:12.5px;margin:8px 0 0">依據：${evSrcLink(c)}</p></div></details>`; }).join("")+
+      `<p class="muted" style="font-size:13px;margin-top:14px">${esc(ESWT_NOTE)}</p>`;
+  }else if(libSel==="evid"){
+    h=`<h2>實證查核</h2><p class="lead">選擇診斷，查看各項治療在臨床指引中的建議等級；也可以貼上你的治療計畫，系統會標出有依據與不建議的項目。資料整理自英文臨床指引，最後整理日期 ${EV_DATE}。</p>
+      <div class="lib-form">
+        <label>診斷<select id="evCond">${EVID.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("")}</select></label>
+        <label>你的治療計畫（選填）<textarea id="evPlan" placeholder="例如：超音波 10 分鐘、足底伸展、貼紮、體外震波 3 次"></textarea></label>
+      </div>
+      <div id="evOut"></div>
+      <p class="muted" style="font-size:13px">${esc(ESWT_NOTE)}</p>
+      <p class="muted" style="font-size:12.5px">等級說明：JOSPT 指引 A＝強證據、B＝中等、C＝弱、D＝證據矛盾、E＝理論或基礎研究、F＝專家意見；ACR 指引為強烈或有條件。這是教育訓練工具，臨床決策請以最新指引與醫師判斷為準。</p>`;
+  }else if(libSel==="gen"){
+    h=`<h2>AI 生成話術</h2><p class="lead">指定診斷和情境，AI 會產生可以直接說出口的溝通腳本。內建實證資料庫裡的診斷，腳本只會推薦有依據的處置，並標出引用來源；生成後系統會再檢查一次，提到不建議的處置會標紅提醒。</p>
+      <div class="lib-form">
+        <label>診斷或情境<input id="gDx" list="dlEvCond" placeholder="例如：足底筋膜炎、五十肩、產後骨盆痛"></label>
+        <datalist id="dlEvCond">${EVID.map(c=>`<option value="${esc(c.name)}">`).join("")}</datalist>
+        <label>腳本類型<select id="gType">
+          <option>完整六步對話</option><option>開場與需求探詢</option><option>白話衛教</option><option>方案與費用說明</option><option>異議與顧慮回應</option><option>邀約與回診追蹤</option><option>病人不適合自費時怎麼說</option>
+        </select></label>
+        <label>病人個性（選填）<input id="gPers" list="dlPers" placeholder="例如：多疑、愛比價"></label>
+        <label>補充（選填）<textarea id="gMore" placeholder="例如：病人說「健保做做就好」、女兒陪同、預算有限"></textarea></label>
+        <div><button class="btn primary" id="gBtn">生成話術</button> <span class="muted" id="gMsg"></span></div>
+      </div>
+      <h3 style="font-size:16px;margin:18px 0 10px">我的話術（存在這台裝置）</h3>
+      <div id="gList">${SCRIPTS.length?SCRIPTS.map((sc,i)=>scriptCard(sc,i)).reverse().join(""):`<p class="muted">還沒有生成的話術。</p>`}</div>`;
   }else if(libSel==="mods"){
     h=`<h2>各項治療的白話說明</h2><p class="lead">病人聽得懂，才會願意投入。標示「常見自費」的項目，說明時記得一併講費用與次數。</p>`;
     let g="";
@@ -1505,6 +1825,45 @@ function renderLib(){
     h=`<h2>${LIB.ethic.title}</h2><p class="lead">${LIB.ethic.lead}</p>`+ETHIC.map(e=>`<div class="step"><h3>${e[0]}</h3><p class="aim" style="margin:0">${e[1]}</p></div>`).join("")+`<p class="muted" style="font-size:13.5px">實際收費項目與告知方式請依所在縣市衛生局核定及診所規範辦理。</p>`;
   }
   $("#libPanel").innerHTML=h;
+  if(libSel==="evid"){
+    const draw=()=>{ const c=EVID.find(x=>x.id===$("#evCond").value), plan=$("#evPlan").value, hit=new Set(matchTx(c,plan));
+      $("#evOut").innerHTML=`<table class="evtab">${c.items.map(it=>`<tr class="${hit.has(it)?"hit":""}"><td>${esc(it.tx)}</td><td>${evBadge(it)}${it.note?` <span class="muted">${esc(it.note)}</span>`:""}</td></tr>`).join("")}</table>
+        ${plan.trim()?`<p style="font-size:14px">${hit.size?`你的計畫比對到 ${hit.size} 項（黃底）。${[...hit].some(i=>evCls(i.d)==="bad")?`<span class="ev bad">含不建議項目</span>`:""}`:"你的計畫沒有比對到指引中的項目，可能是指引未涵蓋。"}</p>`:""}
+        <p class="muted" style="font-size:13px">來源：${evSrcLink(c)}</p>`; };
+    $("#evCond").addEventListener("change",draw); $("#evPlan").addEventListener("input",draw); draw();
+  }
+  if(libSel==="gen"){
+    $("#gBtn").addEventListener("click",genScript);
+    $("#libPanel").querySelectorAll("[data-del-script]").forEach(b=>b.addEventListener("click",()=>{ SCRIPTS.splice(+b.dataset.delScript,1); saveScripts(); renderLib(); }));
+  }
+}
+async function genScript(){
+  const dx=$("#gDx").value.trim(), type=$("#gType").value, pers=$("#gPers").value.trim(), more=$("#gMore").value.trim();
+  if(!dx){ $("#gMsg").textContent="請先填診斷或情境。"; $("#gDx").focus(); return; }
+  if(!hasKey()){ $("#gMsg").textContent=errCopy("no_key"); return; }
+  const cond=findCond(dx);
+  $("#gBtn").disabled=true; $("#gMsg").textContent="AI 正在撰寫，大約 10 到 30 秒……";
+  const p=`你是台灣資深物理治療師與醫病溝通講師。請為以下情境撰寫物理治療師可以直接說出口的溝通腳本，使用台灣口語繁體中文，語氣專業、溫和、不推銷。
+診斷或情境：${dx}
+腳本類型：${type}（完整六步對話要有關心開場、探詢痛點、找出目標、衛教連結、提出選項、處理顧慮並邀約六個階段；其他類型 2 到 4 個階段即可）
+病人個性：${pers||"一般"}
+補充：${more||"無"}
+${priceText()}
+${cond?`實證依據（只能推薦標示「建議」或「可考慮」的處置；標示「不建議」的絕對不可推薦；未評等或非指引項目要誠實說明證據有限或需醫師評估；evidence 要寫出引用的處置、等級與來源）：
+${evidText(cond)}
+${ESWT_NOTE}`:"這個診斷不在內建實證資料庫：只能使用保守、一般性的說法，不可宣稱特定療效，並在 evidence 寫「此診斷需自行查證實證依據」。"}
+倫理：不保證療效、不恐嚇、不貶低健保或其他醫療人員、清楚說明費用與次數、一定給選項、尊重病人決定。
+每個階段 2 到 3 句可以直接說的話，並寫一句這個階段要避免的說法。
+只回傳 JSON：{"title":"腳本標題","steps":[{"stage":"階段名稱","aim":"這個階段的目的","lines":["可直接說的話"],"avoid":"避免的說法"}],"evidence":["引用的實證重點"]}`;
+  try{
+    const r=await aiJSON(p,{temperature:0.7,maxTokens:6000});
+    if(!r||!Array.isArray(r.steps)) throw {code:"parse"};
+    SCRIPTS.push({d:new Date().toISOString(),dx,type,pers,title:r.title,steps:r.steps,evidence:Array.isArray(r.evidence)?r.evidence:[]});
+    saveScripts(); renderLib();
+    const f=scriptFlags(SCRIPTS[SCRIPTS.length-1]);
+    $("#gMsg").textContent=f.length?"已生成，但腳本提到指引不建議的處置，請看紅色提醒。":"已生成，存在下方「我的話術」。";
+  }catch(e){ $("#gMsg").textContent=errCopy(e&&e.code); }
+  finally{ const b=document.getElementById("gBtn"); if(b) b.disabled=false; }
 }
 renderLib();
 
@@ -1629,6 +1988,204 @@ $("#saveSet").addEventListener("click",()=>{
   setTimeout(()=>$("#saveMsg").textContent="",2500);
 });
 
+/* =================== AVATAR（2D 真人照片 + 對嘴） =================== */
+const MP_VER="0.10.14";
+let mpPromise=null;
+function getLandmarker(){
+  if(!mpPromise) mpPromise=(async()=>{
+    const vision=await import(`https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VER}/vision_bundle.mjs`);
+    const files=await vision.FilesetResolver.forVisionTasks(`https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VER}/wasm`);
+    return await vision.FaceLandmarker.createFromOptions(files,{
+      baseOptions:{modelAssetPath:"https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task"},
+      runningMode:"IMAGE",numFaces:1});
+  })().catch(e=>{ console.warn("[avatar] 臉部偵測載入失敗",e); mpPromise=null; return null; });
+  return mpPromise;
+}
+const REDUCED=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+class Avatar{
+  constructor(stage){
+    this.stage=stage;
+    stage.innerHTML=`<div class="av-frame"><div class="av-init"></div><canvas aria-hidden="true"></canvas><div class="av-status" role="status"></div></div>
+      <div class="av-tools"><span class="av-tip"></span><button type="button" class="av-regen">重新生成照片</button></div>`;
+    this.cv=stage.querySelector("canvas"); this.ctx=this.cv.getContext("2d");
+    this.st=stage.querySelector(".av-status"); this.tip=stage.querySelector(".av-tip");
+    this.jaw=document.createElement("canvas");
+    this.open=0; this.target=0; this.talking=false; this.nextBlink=performance.now()+2000; this.blinkStart=0; this.dirty=true;
+    stage.querySelector(".av-regen").addEventListener("click",()=>{ if(this.c){ delete this.c.img; showPortrait(this,this.c,this.onSave,true); } });
+    requestAnimationFrame(t=>this.loop(t));
+  }
+  reset(c,onSave){
+    this.c=c; this.onSave=onSave; this.img=null; this.geo=null; this.speakEnd();
+    this.stage.classList.remove("hasimg","loading"); this.st.textContent="";
+    this.stage.querySelector(".av-init").textContent=String(c.name||"?").slice(0,1);
+    this.ctx.clearRect(0,0,this.cv.width,this.cv.height);
+    this.updateTip();
+  }
+  updateTip(){ this.tip.textContent = V.tts ? (this.c&&this.c.name||"") : "開啟「病人語音」，病人就會開口說話"; }
+  loading(msg){ this.stage.classList.add("loading"); this.st.textContent=msg; }
+  error(msg){ this.stage.classList.remove("loading"); this.st.textContent=msg; }
+  async setImage(src){
+    const img=new Image(); img.src=src;
+    try{ await img.decode(); }catch(e){ this.error("照片讀取失敗"); return; }
+    if(!this.c) return;
+    this.img=img; const W=img.naturalWidth,H=img.naturalHeight;
+    this.cv.width=W; this.cv.height=H; this.jaw.width=W; this.jaw.height=H;
+    this.stage.classList.remove("loading"); this.stage.classList.add("hasimg"); this.st.textContent=""; this.dirty=true;
+    const lm=await getLandmarker();
+    if(lm && this.img===img){
+      try{ const r=lm.detect(img); const pts=r&&r.faceLandmarks&&r.faceLandmarks[0]; if(pts) this.geo=this.measure(pts,img); }
+      catch(e){ console.warn("[avatar] 偵測失敗",e); }
+    }
+    this.dirty=true;
+  }
+  measure(p,img){
+    const W=img.naturalWidth,H=img.naturalHeight, P=i=>({x:p[i].x*W,y:p[i].y*H});
+    const upIn=[78,191,80,81,82,13,312,311,310,415,308].map(P), loIn=[78,95,88,178,87,14,317,402,318,324,308].map(P);
+    const cl=P(78), cr=P(308), chin=P(152), fl=P(234), fr=P(454);
+    const eye=(up,lo)=>({up:up.map(P),lo:lo.map(P)});
+    return {upIn,loIn,cl,cr,mx:(cl.x+cr.x)/2,half:Math.max(4,(cr.x-cl.x)/2),
+      my:(P(13).y+P(14).y)/2, mouthW:Math.hypot(P(291).x-P(61).x,P(291).y-P(61).y),
+      chinY:chin.y, faceW:Math.hypot(fr.x-fl.x,fr.y-fl.y), faceL:fl.x, faceR:fr.x,
+      eyes:[eye([33,246,161,160,159,158,157,173,133],[33,7,163,144,145,153,154,155,133]),
+            eye([263,466,388,387,386,385,384,398,362],[263,249,390,373,374,380,381,382,362])]};
+  }
+  speakStart(text,rate){ this.talking=true; this.chars=[...String(text)]; this.ci=0; this.rate=rate||1; this.sylMs=1000/(4.4*this.rate); this.lastSyl=performance.now(); }
+  boundary(i){ if(this.talking&&typeof i==="number"){ this.ci=i; this.lastSyl=performance.now(); } }
+  speakEnd(){ this.talking=false; this.target=0; }
+  updateTalk(now){
+    if(!this.talking){ this.target=0; return; }
+    let dt=now-this.lastSyl;
+    let ch=this.chars[this.ci]||"";
+    const pause=/[，。！？、,.!?；;：:\s]/.test(ch);
+    const dur=this.sylMs*(pause?1.8:1);
+    if(dt>dur){ this.ci++; this.lastSyl=now; dt=0; ch=this.chars[this.ci]||""; }
+    if(!ch||pause){ this.target=0.04; return; }
+    const amp=0.4+((ch.charCodeAt(0)*9301+49297)%233280)/233280*0.4;   // 每個字的開口大小略有不同
+    this.target=amp*Math.pow(Math.sin(Math.PI*Math.min(1,dt/dur)),0.6);
+  }
+  loop(t){
+    if(!this.stage.isConnected) return;
+    this.updateTalk(t);
+    const prev=this.open; this.open+=(this.target-this.open)*0.38;
+    if(!REDUCED && t>this.nextBlink){ this.blinkStart=t; this.nextBlink=t+2600+Math.random()*3800; }
+    const blinking=this.blinkStart && t-this.blinkStart<300;
+    if(this.img && (this.dirty || blinking || Math.abs(this.open-prev)>0.002 || this.open>0.01)){ this.draw(t); this.dirty=!!blinking; }
+    if(!REDUCED && this.img) this.cv.style.transform=`translateY(${(Math.sin(t/1700)*1.3).toFixed(2)}px) scale(${(1+Math.sin(t/2600)*0.005).toFixed(4)})`;
+    requestAnimationFrame(tt=>this.loop(tt));
+  }
+  draw(t){
+    const {ctx,img}=this, W=this.cv.width, H=this.cv.height, g=this.geo;
+    ctx.clearRect(0,0,W,H); ctx.drawImage(img,0,0);
+    if(!g) return;
+    const o=this.open;
+    if(o>0.02) this.drawMouth(o,g,W,H);
+    if(this.blinkStart){
+      const k=(t-this.blinkStart)/140, b=k<1?k:k<2?2-k:0;
+      if(b<=0) this.blinkStart=0; else for(const e of g.eyes) this.drawLid(e,b,W,H);
+    }
+  }
+  // 依嘴唇內緣的實際形狀張口：上唇固定、下唇與下巴往下移，嘴角保持閉合
+  drawMouth(o,g,W,H){
+    const {ctx,img}=this, d=o*g.mouthW*0.32;
+    const yAt=(pts,x)=>{ for(let i=0;i<pts.length-1;i++){ const a=pts[i],b=pts[i+1]; if(x>=a.x&&x<=b.x){ const f=(x-a.x)/Math.max(1e-3,b.x-a.x); return a.y+(b.y-a.y)*f; } } return x<pts[0].x?pts[0].y:pts[pts.length-1].y; };
+    const openAt=x=>{ const u=(x-g.mx)/g.half; return Math.abs(u)<1 ? d*Math.sqrt(1-u*u) : 0; };
+    const sideL=g.mx-g.faceW*0.55, sideR=g.mx+g.faceW*0.55;
+    const dropAt=x=>{ const u=Math.min(1,Math.abs(x-g.mx)/(g.faceW*0.55)); return d*Math.cos(u*Math.PI/2)**1.3; };
+    // 口腔內部
+    ctx.save();
+    ctx.beginPath();
+    g.upIn.forEach((q,i)=>i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y));
+    for(let i=g.loIn.length-1;i>=0;i--){ const q=g.loIn[i]; ctx.lineTo(q.x,q.y+openAt(q.x)); }
+    ctx.closePath();
+    const cy=g.my+d*0.45;
+    const mg=ctx.createRadialGradient(g.mx,cy,1,g.mx,cy,g.half*1.1);
+    mg.addColorStop(0,"#1c0606"); mg.addColorStop(0.7,"#3a1111"); mg.addColorStop(1,"#5e2626");
+    ctx.fillStyle=mg; ctx.fill();
+    ctx.clip();
+    ctx.filter="blur(0.8px)";
+    ctx.globalAlpha=0.38*Math.min(1,o*1.6);                                    // 上排牙齒
+    ctx.fillStyle="#d8cfc4";
+    ctx.beginPath(); g.upIn.forEach((q,i)=>i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y));
+    for(let i=g.upIn.length-1;i>=0;i--){ const q=g.upIn[i]; ctx.lineTo(q.x,q.y+Math.min(d*0.32,g.half*0.18)*Math.sqrt(Math.max(0,1-((q.x-g.mx)/g.half)**2))); }
+    ctx.fill();
+    ctx.globalAlpha=0.45*o; ctx.fillStyle="#8c3b3b";                            // 舌頭
+    ctx.beginPath(); ctx.ellipse(g.mx,g.my+d*0.95,g.half*0.55,Math.max(1,d*0.35),0,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+    // 下唇與下巴：逐欄拉伸，頸部不動，避免接縫
+    const B=g.chinY+(g.chinY-g.my)*0.9, step=2;
+    for(let x=Math.max(0,sideL|0); x<Math.min(W,sideR); x+=step){
+      const cx=x+step/2, op=openAt(cx), dr=Math.max(op,dropAt(cx));
+      if(dr<0.25) continue;
+      const top=(cx>g.cl.x&&cx<g.cr.x)?yAt(g.loIn,cx):yAt([g.cl,g.cr],cx);
+      if(g.chinY-top<2) continue;
+      ctx.drawImage(img,x,top,step,g.chinY-top, x,top+op,step,(g.chinY+dr)-(top+op));
+      ctx.drawImage(img,x,g.chinY,step,B-g.chinY, x,g.chinY+dr,step,B-(g.chinY+dr));
+    }
+  }
+  // 眨眼：把眼睛上方的眼皮皮膚往下延展蓋住眼睛，邊緣柔化
+  drawLid(e,b,W,H){
+    const xs=[...e.up,...e.lo].map(q=>q.x), top=Math.min(...e.up.map(q=>q.y)), bot=Math.max(...e.lo.map(q=>q.y));
+    const ew=Math.max(...xs)-Math.min(...xs), eh=Math.max(2,bot-top);
+    const x0=Math.min(...xs)-ew*0.22, w=ew*1.44, skin=eh*1.25, srcH=skin+eh*0.2;
+    const L=this.lid||(this.lid=document.createElement("canvas")); L.width=W; L.height=H;
+    const lc=L.getContext("2d");
+    lc.drawImage(this.img, x0,top-skin,w,srcH, x0,top-skin,w,srcH+eh*1.05*b);
+    lc.globalCompositeOperation="destination-in";
+    const cx=x0+w/2, cy=top+eh*0.35*b, rx=w/2, ry=(eh*(0.6+0.5*b)+skin*0.5);
+    const mk=lc.createRadialGradient(0,0,0,0,0,1);
+    mk.addColorStop(0,"#000"); mk.addColorStop(0.7,"#000"); mk.addColorStop(1,"rgba(0,0,0,0)");
+    lc.setTransform(rx,0,0,ry,cx,cy); lc.fillStyle=mk; lc.fillRect(-1,-1,2,2); lc.setTransform(1,0,0,1,0,0);
+    lc.globalCompositeOperation="source-over";
+    this.ctx.drawImage(L,0,0);
+    if(b>0.55){
+      const ctx=this.ctx; ctx.save(); ctx.filter="blur(0.6px)";
+      ctx.strokeStyle=`rgba(40,24,20,${((b-0.55)*1.6*0.6).toFixed(2)})`; ctx.lineWidth=Math.max(1,eh*0.14); ctx.lineCap="round";
+      ctx.beginPath(); e.lo.forEach((q,i)=>{ const y=q.y-eh*0.08; i?ctx.lineTo(q.x,y):ctx.moveTo(q.x,y); }); ctx.stroke(); ctx.restore();
+    }
+  }
+}
+let AV_P=null, AV_K=null;
+const avatarP=()=>AV_P||(AV_P=new Avatar(document.getElementById("stageP")));
+const avatarK=()=>AV_K||(AV_K=new Avatar(document.getElementById("stageK")));
+function avatarFor(who){ if(S&&who===S.c) return AV_P; if(K&&who===K.c) return AV_K; return null; }
+function portraitPrompt(c){
+  const g=/女/.test(c.gender||"")?"woman":/男/.test(c.gender||"")?"man":(/小姐|太太|阿姨|嬤|女士/.test(c.name||"")?"woman":"man");
+  const age=parseInt(c.age,10)||40;
+  return `Photorealistic close-up portrait photograph of a fictional ordinary Taiwanese ${age}-year-old ${g}, not a celebrity. ${c.look||""} Head and shoulders, face centered and facing the camera directly, eyes looking at the viewer, lips gently closed, natural subtle expression. Seated in a bright modern physiotherapy clinic with a softly blurred background. Soft natural window light, highly detailed realistic skin texture, detailed eyes, eyelashes, eyebrows and lips, natural asymmetry, sharp focus, 85mm lens, professional editorial portrait photography. No text, no watermark, no logo.`.slice(0,1900);
+}
+async function shrinkImage(src,max){
+  const img=new Image(); img.src=src; await img.decode();
+  const sc=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));
+  const c=document.createElement("canvas"); c.width=Math.round(img.naturalWidth*sc); c.height=Math.round(img.naturalHeight*sc);
+  c.getContext("2d").drawImage(img,0,0,c.width,c.height); return c.toDataURL("image/jpeg",0.88);
+}
+async function genPortrait(c){
+  const res=await fetch(RELAY+"/image",{method:"POST",headers:{"Content-Type":"application/json","X-Access-Code":ACCESS},
+    body:JSON.stringify({prompt:portraitPrompt(c),seed:Math.floor(Math.random()*2147483000)})});
+  const d=await res.json().catch(()=>null);
+  if(!res.ok||!d||!d.image) throw {code:(d&&d.error&&d.error.message)||("http_"+res.status)};
+  const src=/^data:/.test(d.image)?d.image:"data:image/jpeg;base64,"+d.image;
+  return shrinkImage(src,560);
+}
+async function showPortrait(av,c,onSave,force){
+  av.reset(c,onSave);
+  if(c.img && !force){ await av.setImage(c.img); return; }
+  if(!RELAY){ av.error("需要連接中繼服務才能生成照片"); return; }
+  av.loading("正在生成病人照片，約 5 到 15 秒……");
+  try{
+    const early=!force&&PENDING_IMG[c.id];
+    const img=early ? await early : await genPortrait(c);
+    if(c.img===img){ if(av.c===c) await av.setImage(img); return; }
+    if(av.c!==c) return;
+    c.img=img; if(onSave) onSave();
+    await av.setImage(img);
+  }catch(e){
+    if(av.c!==c) return;
+    const m={image_unavailable:"中繼服務尚未更新，請診所負責人更新 Cloudflare 程式",access_code:"需要診所通行碼",http_404:"中繼服務尚未更新，請診所負責人更新 Cloudflare 程式"}[e&&e.code];
+    av.error(m||"照片生成失敗（可能是今日免費額度用完），不影響練習");
+  }
+}
+
 /* =================== VOICE =================== */
 const V={tts:false,auto:false,voiceF:"",voiceM:"",rate:1};
 try{ Object.assign(V, JSON.parse(localStorage.getItem("ptt-voice")||"{}")); }catch(e){}
@@ -1674,18 +2231,27 @@ function chooseVoice(g){
   const re = g==="F"?FEMALE : g==="M"?MALE : null;
   return (re && VOICES.find(x=>re.test(x.name) && isGood(x))) || VOICES.find(isGood) || (re && VOICES.find(x=>re.test(x.name))) || VOICES[0];
 }
+function ttsCancel(){ if(canTTS) speechSynthesis.cancel(); [AV_P,AV_K].forEach(a=>a&&a.speakEnd()); }
 function speakText(text, who, keep){
   if(!canTTS||!V.tts) return;
   const clean=String(text).replace(/（[^）]*）|\([^)]*\)|[「」『』…—~～*#]/g,"").replace(/\s+/g," ").trim();
   if(!clean) return;
-  if(!keep) speechSynthesis.cancel();
+  if(!keep) ttsCancel();
   const voice=chooseVoice(genderOf(who));
+  const av=avatarFor(who);
   // 依句子切段播放，避免長句被截斷或聲音失真；音高維持原聲，不做人工變調
   const parts=clean.match(/[^。！？!?；;]+[。！？!?；;]?/g)||[clean];
-  parts.map(t=>t.trim()).filter(Boolean).forEach(t=>{
+  const list=parts.map(t=>t.trim()).filter(Boolean);
+  list.forEach((t,i)=>{
     const u=new SpeechSynthesisUtterance(t);
     u.lang=(voice&&voice.lang)||"zh-TW"; u.rate=V.rate||1; u.pitch=1; u.volume=1;
     if(voice) u.voice=voice;
+    if(av){
+      u.onstart=()=>av.speakStart(t,u.rate);
+      u.onboundary=e=>av.boundary(e.charIndex);
+      u.onend=()=>{ if(i===list.length-1) av.speakEnd(); };
+      u.onerror=()=>av.speakEnd();
+    }
     speechSynthesis.speak(u);
   });
 }
@@ -1709,7 +2275,7 @@ function syncToggles(){
   const t=document.getElementById("vTTS"); if(t) t.checked=!!V.tts;
 }
 document.querySelectorAll("[data-voice-toggle]").forEach(b=>b.addEventListener("click",()=>{
-  V.tts=!V.tts; saveV(); syncToggles(); if(!V.tts&&canTTS) speechSynthesis.cancel();
+  V.tts=!V.tts; saveV(); syncToggles(); if(!V.tts) ttsCancel(); [AV_P,AV_K].forEach(a=>a&&a.c&&a.updateTip());
 }));
 syncToggles();
 
@@ -1725,7 +2291,7 @@ function attachMic(textarea, sendBtn){
   btn.addEventListener("click",()=>{
     if(rec){ stop(); return; }
     if(activeRec) activeRec();
-    if(canTTS) speechSynthesis.cancel();
+    ttsCancel();
     rec=new SR(); rec.lang="zh-TW"; rec.interimResults=true; rec.continuous=true;
     base=textarea.value?textarea.value.replace(/\s*$/,"")+" ":""; gotText=false;
     rec.onresult=e=>{
