@@ -564,12 +564,14 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
       <p class="lead">按輸入框旁的麥克風就能用講的。語音辨識與朗讀使用瀏覽器內建功能，不會用到 AI 額度。電腦版 Chrome、Edge 與 Android 效果最好；iPhone 建議使用 Chrome，或繼續打字。</p>
       <div class="form">
         <label style="display:flex;gap:8px;align-items:center;color:var(--ink)"><input type="checkbox" id="vTTS" style="width:auto"> 病人用聲音回答</label>
+        <label>語音來源<select id="vCloud"><option value="1">雲端自然語音（像真人，建議）</option><option value="0">瀏覽器內建語音</option></select></label>
+        <p class="muted" id="vCloudMsg" style="font-size:13px;margin:0"></p>
         <label style="display:flex;gap:8px;align-items:center;color:var(--ink)"><input type="checkbox" id="vAuto" style="width:auto"> 講完一段話後自動送出（不勾就會先停在輸入框讓你檢查）</label>
         <label>女性病人的聲音<select id="vVoiceF"></select></label>
         <label>男性病人的聲音<select id="vVoiceM"></select></label>
         <p class="muted" style="font-size:13px;margin:0">聲音最自然的是 <b>Microsoft Edge</b> 內建的「曉臻 HsiaoChen」「雲哲 YunJhe」等 Natural 語音；Chrome 請選「Google 國語（臺灣）」。標示「推薦」的是比較自然的聲音。</p>
         <label>語速 <input type="range" id="vRate" min="0.7" max="1.4" step="0.05"></label>
-        <div><button class="btn" id="vTest">試聽</button> <span class="muted" id="vMsg"></span></div>
+        <div><button class="btn" id="vTest">試聽女聲</button> <button class="btn" id="vTestM">試聽男聲</button> <span class="muted" id="vMsg"></span></div>
       </div>
     </div>
     <div class="panel" style="margin-bottom:18px">
@@ -2009,6 +2011,7 @@ if(RELAY){
   (async()=>{
     const d=await relayPing();
     if(d&&d.needCode&&!d.codeOK) showCodeBox(ACCESS?"通行碼已變更，請重新輸入。":"");
+    TTS_LIST=(d&&Array.isArray(d.tts))?d.tts:[]; showCloudStatus();
     if(d&&d.needCode) $("#codeClear").hidden=false;
   })();
 }
@@ -2109,8 +2112,10 @@ class Avatar{
   }
   speakStart(text,rate){ this.talking=true; this.chars=[...String(text)]; this.ci=0; this.rate=rate||1; this.sylMs=1000/(4.4*this.rate); this.lastSyl=performance.now(); }
   boundary(i){ if(this.talking&&typeof i==="number"){ this.ci=i; this.lastSyl=performance.now(); } }
-  speakEnd(){ this.talking=false; this.target=0; }
+  speakEnd(){ this.talking=false; this.target=0; this.ext=null; }
+  level(v){ this.ext=v; if(v==null) this.target=0; }
   updateTalk(now){
+    if(this.ext!=null){ this.target=this.ext; return; }   // 雲端語音：嘴型跟著實際音量
     if(!this.talking){ this.target=0; return; }
     let dt=now-this.lastSyl;
     let ch=this.chars[this.ci]||"";
@@ -2289,9 +2294,66 @@ function chooseVoice(g){
   const re = g==="F"?FEMALE : g==="M"?MALE : null;
   return (re && VOICES.find(x=>re.test(x.name) && isGood(x))) || VOICES.find(isGood) || (re && VOICES.find(x=>re.test(x.name))) || VOICES[0];
 }
-function ttsCancel(){ if(canTTS) speechSynthesis.cancel(); [AV_P,AV_K].forEach(a=>a&&a.speakEnd()); }
+/* ---- 雲端自然語音（Azure／Google／MeloTTS，經中繼服務） ---- */
+let TTS_LIST=[], LAST_TTS="", AC=null, curSrc=null, speakToken=0, cloudFails=0;
+const audioCache=new Map();
+const TTS_NAME={azure:"Azure 自然語音（台灣口音，最像真人）",google:"Google WaveNet（台灣口音）",melotts:"Cloudflare MeloTTS（大陸口音，品質普通）"};
+function cloudOn(){ return V.cloud!==false && !!RELAY && TTS_LIST.length>0 && cloudFails<3; }
+function showCloudStatus(){
+  const m=document.getElementById("vCloudMsg"); if(!m) return;
+  if(!RELAY) m.textContent="雲端語音需要中繼服務。";
+  else if(!TTS_LIST.length) m.textContent="中繼服務尚未啟用語音，目前使用瀏覽器內建語音。請診所負責人更新 Cloudflare 程式。";
+  else m.textContent="已啟用："+TTS_LIST.map(x=>TTS_NAME[x]||x).join(" → ")+(TTS_LIST[0]==="melotts"?"。想要最自然的台灣口音，請設定 Azure 語音金鑰。":"");
+}
+function ensureAC(){
+  if(!AC){ const C=window.AudioContext||window.webkitAudioContext; if(C) AC=new C(); }
+  if(AC&&AC.state==="suspended") AC.resume().catch(()=>{});
+  return AC;
+}
+["pointerdown","keydown"].forEach(ev=>document.addEventListener(ev,()=>ensureAC(),{passive:true}));
+function fetchTTS(text,g){
+  const key=g+"|"+(V.rate||1)+"|"+text;
+  if(audioCache.has(key)) return audioCache.get(key);
+  const p=fetch(RELAY+"/tts",{method:"POST",headers:{"Content-Type":"application/json","X-Access-Code":ACCESS},body:JSON.stringify({text,gender:g,rate:V.rate||1})})
+    .then(async r=>{ if(!r.ok) throw new Error("tts "+r.status); LAST_TTS=r.headers.get("X-TTS-Provider")||LAST_TTS; return r.arrayBuffer(); });
+  audioCache.set(key,p); p.catch(()=>audioCache.delete(key));
+  if(audioCache.size>60) audioCache.delete(audioCache.keys().next().value);
+  return p;
+}
+async function cloudSpeak(text,who){
+  const token=++speakToken, av=avatarFor(who), g=genderOf(who)||"F";
+  const ac=ensureAC(); if(!ac) throw new Error("no_audio");
+  const buf=await fetchTTS(text,g);
+  if(token!==speakToken) return;
+  const audio=await ac.decodeAudioData(buf.slice(0));
+  if(token!==speakToken) return;
+  const src=ac.createBufferSource(); src.buffer=audio;
+  const an=ac.createAnalyser(); an.fftSize=1024; src.connect(an); an.connect(ac.destination);
+  const data=new Float32Array(an.fftSize); let raf=0;
+  const tick=()=>{ an.getFloatTimeDomainData(data); let sum=0; for(let i=0;i<data.length;i++) sum+=data[i]*data[i];
+    const rms=Math.sqrt(sum/data.length); if(av) av.level(Math.min(1,Math.max(0,(rms-0.012)*5))); raf=requestAnimationFrame(tick); };
+  src.onended=()=>{ cancelAnimationFrame(raf); if(av) av.level(null); if(curSrc===src) curSrc=null; };
+  curSrc=src; src.start(); tick(); cloudFails=0;
+}
+function ttsCancel(){
+  speakToken++;
+  if(curSrc){ try{ curSrc.stop(); }catch(e){} curSrc=null; }
+  if(canTTS) speechSynthesis.cancel();
+  [AV_P,AV_K].forEach(a=>a&&a.speakEnd());
+}
 function speakText(text, who, keep){
-  if(!canTTS||!V.tts) return;
+  if(!V.tts) return;
+  if(cloudOn()){
+    const clean=String(text).replace(/（[^）]*）|\([^)]*\)|[「」『』*#~～]/g,"").replace(/…+/g,"，").replace(/\s+/g," ").trim().replace(/[，,]+$/,"");
+    if(!clean) return;
+    if(!keep) ttsCancel();
+    cloudSpeak(clean,who).catch(e=>{ console.warn("[tts] 雲端語音失敗，改用瀏覽器語音",e); cloudFails++; browserSpeak(text,who,true); });
+    return;
+  }
+  browserSpeak(text,who,keep);
+}
+function browserSpeak(text, who, keep){
+  if(!canTTS) return;
   const clean=String(text).replace(/（[^）]*）|\([^)]*\)|[「」『』…—~～*#]/g,"").replace(/\s+/g," ").trim();
   if(!clean) return;
   if(!keep) ttsCancel();
@@ -2392,7 +2454,10 @@ attachMic(document.getElementById("kInput"), document.getElementById("kSend"));
   sf.addEventListener("change",()=>{ V.voiceF=sf.value; saveV(); });
   sm.addEventListener("change",()=>{ V.voiceM=sm.value; saveV(); });
   r.addEventListener("input",()=>{ V.rate=+r.value; saveV(); });
-  $("#vTest").addEventListener("click",()=>{ const o=V.tts; V.tts=true; speakText("老師你好，我這個肩膀痛了快半年，晚上都睡不好。",{gender:"女"}); speakText("我是覺得啦，健保做做熱敷應該就夠了吧？",{gender:"男"},true); V.tts=o; });
+  $("#vTest").addEventListener("click",()=>{ ensureAC(); const o=V.tts; V.tts=true; speakText("老師你好，我這個肩膀痛了快半年，晚上都睡不好，真的很困擾。",{gender:"女"}); V.tts=o; });
+  $("#vTestM").addEventListener("click",()=>{ ensureAC(); const o=V.tts; V.tts=true; speakText("我是覺得啦，健保做做熱敷應該就夠了吧？自費一次要多少錢？",{gender:"男"}); V.tts=o; });
+  const vc=$("#vCloud"); vc.value=V.cloud===false?"0":"1"; showCloudStatus();
+  vc.addEventListener("change",()=>{ V.cloud=vc.value==="1"; saveV(); cloudFails=0; });
 })();
 </script>
 </body>
