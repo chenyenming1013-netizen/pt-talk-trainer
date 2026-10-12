@@ -405,6 +405,16 @@ nav.tabs button[aria-selected="true"]{background:var(--sage);color:#fff}
   .composer .grid3{grid-template-columns:1fr 1fr}
 }
 @media (min-width:700px) and (max-height:620px){ .quick{max-height:64px} }
+/* ---------- 練習情境：家屬陪同、回訪 ---------- */
+.scenebar{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;background:var(--sage-soft);border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin-bottom:12px;font-size:14px}
+.scenebar>.muted{font-size:12.5px;flex:1 1 220px}
+.scenebar label{display:flex;gap:6px;align-items:center;color:var(--ink-2);font-size:13.5px}
+.scenebar select{font:inherit;font-size:13.5px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:5px 8px}
+.msg.fam{align-self:flex-start;background:var(--amber-soft);border-bottom-left-radius:4px;margin-left:18px}
+.msg.fam .act,.msg.pt .who-tag{display:block;font-size:12px;font-weight:700;opacity:.8;margin-bottom:2px}
+#view-practice.line-mode .msg.pt,#view-practice.line-mode .msg.me{border-radius:16px;font-size:15px}
+#view-practice.line-mode .msg.me{background:#06C755;color:#fff}
+.scene-chip{font-size:12px;font-weight:700;padding:1px 9px;border-radius:99px;background:var(--amber-soft);color:var(--amber);margin-left:6px;white-space:nowrap}
 /* ---------- 新手示範 ---------- */
 .demo-btn{border-color:var(--sage);color:var(--sage);font-weight:700}
 .demo{position:fixed;inset:0;z-index:60;background:rgba(10,20,25,.5);display:grid;place-items:center;padding:12px}
@@ -513,6 +523,22 @@ body.demo-on{overflow:hidden}
       <div class="cases" id="cases"></div>
       </div>
       <div class="pick-main">
+      <div class="scenebar" id="sceneBar">
+        <b>本次練習情境</b><span class="muted">套用到下一位開始練習的病人，含已儲存的病人</span>
+        <label>情境<select id="cScene">
+          <option value="clinic">門診當面說明</option>
+          <option value="phone">電話回訪：病人沒回診</option>
+          <option value="line">LINE 訊息回訪：病人沒回診</option>
+        </select></label>
+        <label>陪同家屬<select id="cComp">
+          <option value="">無（病人自己來）</option>
+          <option value="女兒">女兒</option><option value="兒子">兒子</option>
+          <option value="先生">先生</option><option value="太太">太太</option>
+          <option value="媽媽">媽媽（病人是學生）</option>
+          <option value="外籍看護">外籍看護</option>
+          <option value="random">隨機</option>
+        </select></label>
+      </div>
       <datalist id="dlAge"><option value="16"><option value="22"><option value="28"><option value="35"><option value="42"><option value="50"><option value="58"><option value="65"><option value="72"><option value="80"><option value="20多歲"><option value="40多歲"><option value="60多歲"></datalist>
       <datalist id="dlRegion"><option value="頸部"><option value="肩膀"><option value="手肘"><option value="手腕／手指"><option value="上背／胸椎"><option value="下背"><option value="骨盆／薦髂關節"><option value="髖部"><option value="膝蓋"><option value="小腿／阿基里斯腱"><option value="腳踝"><option value="足底／足部"><option value="頭痛／顳顎關節"><option value="中風後"><option value="膝關節置換術後"><option value="前十字韌帶重建術後"><option value="骨折術後"><option value="長者跌倒／平衡"><option value="產後骨盆"><option value="運動傷害"></datalist>
       <datalist id="dlJob"><option value="上班族（久坐電腦）"><option value="軟體工程師"><option value="餐飲業外場"><option value="廚師"><option value="計程車司機"><option value="外送員"><option value="建築工人"><option value="搬運工"><option value="護理師"><option value="美髮師"><option value="牙醫師"><option value="國小老師"><option value="業務"><option value="家庭主婦"><option value="照顧孫子的長輩"><option value="退休公務員"><option value="農夫"><option value="大學生"><option value="高中籃球校隊"><option value="馬拉松跑者"><option value="健身教練"><option value="瑜伽老師"><option value="音樂家"><option value="新手媽媽"></datalist>
@@ -1070,18 +1096,32 @@ let S = null; // session
 function startSession(id){
   const c = allCases().find(x=>x.id===id);
   if(!c) return;
-  S = {c, turns:[], trust:35, mood:"有點防備", found:[], decision:null, busy:false, ctl:null};
+  const scene=$("#cScene").value||"clinic";
+  let comp=$("#cComp").value; if(comp==="random") comp=pick(["女兒","兒子","先生","太太","外籍看護"]);
+  if(comp==="媽媽" && !(parseInt(c.age,10)<=20)) comp=parseInt(c.age,10)>=60?"女兒":"太太";
+  if(scene!=="clinic") comp="";
+  S = {c, turns:[], trust:scene==="clinic"?35:45, mood:scene==="clinic"?"有點防備":"有點不好意思", found:[], decision:null, busy:false, ctl:null,
+       scene, comp, absent: scene==="clinic"?null:pick(ABSENT)};
+  $("#view-practice").classList.toggle("line-mode", scene==="line");
   $("#pickScreen").hidden = true; $("#reportScreen").hidden = true; $("#sessionScreen").hidden = false;
-  $("#chatTitle").textContent = `與${c.name}的對話`;
+  $("#chatTitle").innerHTML = `與${esc(c.name)}的${scene==="phone"?"電話回訪":scene==="line"?"LINE 回訪":"對話"}${comp?`<span class="scene-chip">${esc(comp)}陪同</span>`:""}`;
   renderSide();
   showPortrait(avatarP(), c, ()=>{ saveCustom(); renderCases(); });
   const opener = openerFor(c);
   $("#log").innerHTML = "";
   const visit = c.visit || (["ct","lb","jk"].includes(c.id)?"第一次來診所":"是第四次回診");
-  addMsg("sys", `情境：${c.name}今天${visit}，你剛評估完。對話由病人先開口。`);
-  addMsg("pt", opener);
-  S.turns.push({role:"patient", text:opener});
+  if(scene==="phone"){
+    addMsg("sys", `情境：${c.name}之前來做過 ${S.absent.visits} 次治療，已經 ${S.absent.weeks} 週沒有回診，也沒有預約。你打電話關心，對方剛接起來。`);
+    const o="（電話接起來）喂？請問哪位？"; addMsg("pt", o); S.turns.push({role:"patient", text:o});
+  }else if(scene==="line"){
+    addMsg("sys", `情境：${c.name}之前來做過 ${S.absent.visits} 次治療，已經 ${S.absent.weeks} 週沒有回診。你用診所 LINE 官方帳號傳訊息關心，請你先傳第一則訊息。`);
+  }else{
+    addMsg("sys", `情境：${c.name}今天${visit}，你剛評估完。${comp?`${c.name}的${comp}也陪同進來，坐在旁邊。`:""}對話由病人先開口。`);
+    addMsg("pt", opener);
+    S.turns.push({role:"patient", text:opener});
+  }
   renderQuick();
+  $("#input").placeholder = scene==="line" ? "輸入要傳給病人的 LINE 訊息（Enter 送出）" : scene==="phone" ? "你在電話這頭，輸入你要說的話（Enter 送出）" : "你是治療師，輸入你要對病人說的話（Enter 送出，Shift+Enter 換行）";
   $("#input").value=""; $("#input").focus();
 }
 function openerFor(c){
@@ -1158,16 +1198,18 @@ function quickStage(){
 function honor(){ const n=S&&S.c&&S.c.name||""; return n?n+"，":""; }
 function renderQuick(shuffle){
   if(!S) return;
-  const st=quickStage(), used=new Set(S.turns.filter(t=>t.role==="therapist").map(t=>t.text));
+  const call=S.scene&&S.scene!=="clinic";
+  const ST=call?CSTAGES:QSTAGES;
+  const st=call?Math.min(5,S.turns.filter(t=>t.role==="therapist").length):quickStage(), used=new Set(S.turns.filter(t=>t.role==="therapist").map(t=>t.text));
   if(shuffle||S.qStage!==st){ S.qStage=st; S.qSeed=Math.random(); }
   const fill=t=>t.replace("{h}",honor());
   let seed=Math.floor(S.qSeed*1e9)+st;
   const rnd=()=>{ seed=(seed*1664525+1013904223)%4294967296; return seed/4294967296; };
   const pickFrom=(arr,n)=>{ const a=arr.map(fill).filter(t=>!used.has(t)); for(let i=a.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a.slice(0,n); };
   const ai=(S.suggest||[]).filter(t=>t&&!used.has(t)).slice(0,4);
-  const local=pickFrom(QSTAGES[st].pool, ai.length?3:5);
-  const nxt=st<5?pickFrom(QSTAGES[st+1].pool,1):[];
-  $("#quick").innerHTML=`<div class="qlabel"><span>建議階段：<b>${QSTAGES[st].name}</b>${st<5?`　下一步：${QSTAGES[st+1].name}`:""}</span><button class="qmore" type="button">換一批</button></div>
+  const local=pickFrom(ST[st].pool, ai.length?3:5);
+  const nxt=st<5?pickFrom(ST[st+1].pool,1):[];
+  $("#quick").innerHTML=`<div class="qlabel"><span>建議階段：<b>${ST[st].name}</b>${st<5?`　下一步：${ST[st+1].name}`:""}</span><button class="qmore" type="button">換一批</button></div>
     <div class="qgroup">${ai.map(t=>`<button class="ai" title="AI 依目前對話建議">${esc(t)}</button>`).join("")}${local.map(t=>`<button>${esc(t)}</button>`).join("")}${nxt.map(t=>`<button title="下一階段">${esc(t)}</button>`).join("")}</div>`;
   $("#quick").querySelectorAll(".qgroup button").forEach(b=>b.addEventListener("click",()=>{ $("#input").value=b.textContent; $("#input").focus(); }));
   $("#quick .qmore").addEventListener("click",()=>{ S.suggest=[]; renderQuick(true); });
@@ -1181,19 +1223,80 @@ function addMsg(kind, text, act){
   $("#log").appendChild(d); $("#log").scrollTop=$("#log").scrollHeight;
   return d;
 }
+function addFam(text){
+  const d=document.createElement("div"); d.className="msg fam";
+  const a=document.createElement("span"); a.className="act"; a.textContent=`${S.comp}（家屬）`; d.appendChild(a);
+  d.appendChild(document.createTextNode(text));
+  $("#log").appendChild(d); $("#log").scrollTop=$("#log").scrollHeight;
+  if(V.tts && S.scene!=="line") speakText(text,{gender:/女兒|太太|媽媽|看護/.test(S.comp)?"女":"男"},true);
+}
 function addHint(text){
   const d=document.createElement("div"); d.className="hint";
   d.innerHTML=`<b>教練悄悄話</b>${esc(text)}`;
   $("#log").appendChild(d); $("#log").scrollTop=$("#log").scrollHeight;
 }
 function transcript(){
-  return S.turns.map(t=>(t.role==="patient"?`病人：`:`治療師：`)+t.text).join("\n");
+  return S.turns.map(t=>(t.role==="patient"?`病人：`:t.role==="family"?`${S.comp||"家屬"}：`:`治療師：`)+t.text).join("\n");
 }
+const ABSENT=[
+  {why:"覺得比較不痛了，以為好了就不用再來",visits:3,weeks:3},
+  {why:"工作或家裡太忙，排不出時間，又不好意思說",visits:4,weeks:4},
+  {why:"覺得做了幾次沒什麼效果，有點失望",visits:5,weeks:3},
+  {why:"自費的費用壓力大，又不好意思開口",visits:2,weeks:5},
+  {why:"上次治療完痛了兩天，有點害怕",visits:3,weeks:2},
+  {why:"家人覺得復健沒用，叫他去看別的（推拿或打針）",visits:4,weeks:6},
+  {why:"交通不方便，最近沒人可以載",visits:6,weeks:4}];
+const COMP_TXT={
+  女兒:"成年女兒，關心爸媽、會上網查資料，會追問效果與副作用，也可能替長輩問價錢",
+  兒子:"成年兒子，比較務實，在意要花多少錢、要跑幾次，講話直接",
+  先生:"先生，心疼太太但覺得自費太貴，有時會插話說「健保做就好了吧」",
+  太太:"太太，很關心先生、會補充先生沒說的症狀（例如晚上痛醒），也會問回家要注意什麼",
+  媽媽:"病人的媽媽，很保護孩子，在意會不會影響比賽或課業、會不會有後遺症，常替孩子回答",
+  外籍看護:"外籍看護，中文簡單、只懂部分專有名詞，負責帶長輩來與回家照顧，需要治療師用很簡單的話教她居家運動"};
+const CSTAGES=[
+  {name:"表明身分",pool:["{h}你好，我是 OO 物理治療所的治療師，現在方便講兩分鐘電話嗎？","不好意思打擾你，我是之前幫你做治療的治療師，想關心一下你的狀況。"]},
+  {name:"關心近況",pool:["最近痛的地方怎麼樣？跟上次來治療時比起來呢？","這幾週日常生活有沒有哪個動作還是會卡卡的？","上次教你的居家運動，還有在做嗎？做起來感覺怎樣？"]},
+  {name:"了解原因",pool:["最近比較少看到你，是不是有什麼不方便，或是對治療有什麼想法？","沒關係，你可以直接跟我說，我想知道怎麼安排對你比較好。","是時間上不好排，還是覺得效果不如預期？"]},
+  {name:"回應顧慮",pool:["我懂，覺得不痛就以為好了很正常。不過組織修復通常比不痛慢一點。","如果費用是考量，我們可以只做健保的部分，加上居家運動。","上次做完會痠痛兩天，下次我可以把強度調低一點。"]},
+  {name:"提供選擇",pool:["你可以選回來做一次評估就好，我幫你看要不要繼續，不用一次排很多。","如果暫時不方便來，我傳兩個居家運動影片給你，先在家練。"]},
+  {name:"約定下一步",pool:["那我先幫你保留下週三晚上或週六早上，你看哪個方便？","不用急著決定，你考慮好再回覆我就好，有任何不舒服隨時問我。"]}];
 function levelText(){
   return {easy:"個性溫和，顧慮不多，治療師說明合理就容易同意。",normal:"像真實門診病人，有顧慮但講理，治療師真的了解你才會答應。",hard:"多疑、非常在意價錢、會拿別家比較，需要治療師很有耐心並給出具體資訊才會鬆動。"}[SET.level];
 }
 function priceText(){
   return `診所價格：體外震波單次 NT$${SET.sw}，一般建議 ${SET.swn}；一對一運動治療單堂 NT$${SET.ex}；徒手治療單次 NT$${SET.mt}。健保復健（熱敷、電療、超音波、牽引等）只需掛號與部分負擔。`;
+}
+function sceneCoach(){
+  if(!S) return "";
+  const call=S.scene==="phone"||S.scene==="line";
+  let t=call
+    ?`這是一通${S.scene==="phone"?"電話":"LINE 訊息"}回訪：病人已經 ${S.absent.weeks} 週沒回診，真正原因是「${S.absent.why}」。好的回訪流程：表明身分並確認方便、關心近況、不責怪地了解原因、回應顧慮、給符合病人狀況的選擇、約定具體下一步（或尊重病人暫停）。評分時 rapport 看開場與關心、discovery 看是否問出真正原因、education 看是否說明為何需要回來或可在家做什麼、options 看是否給彈性選擇、objection 看如何回應原因、close 看是否約定具體下一步而不施壓。${S.scene==="line"?"LINE 訊息要簡短、一則一個重點，不在訊息中寫出病人完整病情等隱私細節。":"電話要簡潔，先確認對方方便講話。"}\n`
+    :"對話流程參考：關心開場、探詢痛點、找出目標、衛教連結、提出選項、處理顧慮並邀約。\n";
+  if(S.comp) t+=`這次病人的${S.comp}陪同（${COMP_TXT[S.comp]||""}）。好的治療師會同時尊重病人本人的意願、回應家屬的疑問、不只跟家屬講話；評分時把這點納入 rapport 與 objection。\n`;
+  return t;
+}
+function sceneRules(){
+  if(!S) return "";
+  let t="";
+  if(S.scene==="phone"||S.scene==="line"){
+    t+=`【這次的情境：${S.scene==="phone"?"治療師打電話給你":"治療師用診所的 LINE 官方帳號傳訊息給你"}】
+你之前來做過 ${S.absent.visits} 次治療，已經 ${S.absent.weeks} 週沒有回診也沒有預約。
+你沒回診的真正原因：${S.absent.why}。一開始不要直接說，先客套或含糊帶過（例如「最近比較忙啦」）；治療師真誠關心、沒有責怪或推銷時，才慢慢說出真正原因。
+治療師一開口就推銷或催你預約，你會敷衍、想掛電話或已讀不回（回覆「……」或很短的字）。
+治療師若能理解原因、提出符合你狀況的選擇（例如先回來評估一次、調整強度、只做健保、居家運動），你會願意約時間或說會考慮。
+decision：約好回診時間用 accept；說會考慮、再看看用 think；明確不想再來用 decline。
+${S.scene==="line"?"你是用 LINE 打字回覆：句子短、口語、偶爾用一個表情符號或「好喔」「再看看」，不要用括號描述動作。\n":"你在講電話：語氣要像電話中的口語，可以有「喔」「嗯」等語助詞，括號只描述聲音（例如嘆氣）。\n"}
+`;
+  }
+  if(S.comp){
+    t+=`【陪同家屬】
+你的${S.comp}陪你一起來診間，坐在旁邊。家屬設定：${COMP_TXT[S.comp]||S.comp}。
+家屬大約每兩到三回合插話一次（放在 family 欄位，1 到 2 句），可能替你回答、追問價錢或效果、提出和你不同的意見，或在治療師說明清楚時幫忙說服你。
+治療師要同時照顧到你和家屬：只跟家屬講話、忽略你的意願，你會不開心；完全不理家屬，家屬會更懷疑。
+自費的決定通常需要家屬點頭，家屬沒被說服前，你最多只會決定 think。
+`;
+  }
+  return t;
 }
 function patientPrompt(){
   const c=S.c;
@@ -1210,7 +1313,7 @@ ${c.personality?`個性與說話風格：${c.personality}
 `:""}個性難度：${levelText()}
 ${priceText()}
 
-【扮演規則】
+${sceneRules()}【扮演規則】
 1. 每次回覆 1 到 3 句，口語自然，可以用括號簡短描述動作或表情。
 2. 治療師若只是推銷、講一堆專有名詞、打斷你、沒問你的感受，你就變得冷淡或防備，信任下降。
 3. 治療師若真誠關心、問出你的目標、白話解釋、清楚講費用與次數、給你選擇、尊重你的決定，信任上升。
@@ -1223,7 +1326,7 @@ ${priceText()}
 ${transcript()}
 
 請只回傳一個 JSON 物件，不要任何其他文字：
-{"reply":"你要說的話","trust":0到100的整數（目前是 ${S.trust}，每回合變化通常在 -15 到 +12 之間）,"mood":"4 到 8 字描述你的情緒","revealed":"這回合你透露了哪個原本藏著的目標或顧慮，用一句話寫出；沒有就空字串","decision":"none 或 accept 或 think 或 decline","suggest":["給治療師的建議：依目前對話進度，治療師下一句可以說的話，共 4 句，策略要不同（例如追問細節、同理情緒、白話衛教、提出選項或邀約），每句 35 字內，台灣口語，符合倫理（不保證療效、不施壓）。這 4 句不是你（病人）說的話"]}`;
+{"reply":"你要說的話","family":"${S.comp?`${S.comp}這回合插話說的話，不插話就空字串`:"空字串"}","trust":0到100的整數（目前是 ${S.trust}，每回合變化通常在 -15 到 +12 之間）,"mood":"4 到 8 字描述你的情緒","revealed":"這回合你透露了哪個原本藏著的目標或顧慮，用一句話寫出；沒有就空字串","decision":"none 或 accept 或 think 或 decline","suggest":["給治療師的建議：依目前對話進度，治療師下一句可以說的話，共 4 句，策略要不同（例如追問細節、同理情緒、白話衛教、提出選項或邀約），每句 35 字內，台灣口語，符合倫理（不保證療效、不施壓）。這 4 句不是你（病人）說的話"]}`;
 }
 async function send(){
   if(!S || S.busy || S.decisionLocked) return;
@@ -1243,6 +1346,8 @@ async function send(){
     const reply = String(r.reply||"……").trim();
     addMsg("pt", reply);
     S.turns.push({role:"patient", text:reply});
+    const fam=S.comp?String(r.family||"").trim():"";
+    if(fam && !/^空字串$/.test(fam)){ addFam(fam); S.turns.push({role:"family", text:fam}); }
     const t = Math.max(0,Math.min(100, parseInt(r.trust,10)));
     if(!isNaN(t)) S.trust=t;
     if(r.mood) S.mood=String(r.mood).slice(0,16);
@@ -1275,8 +1380,7 @@ $("#hintBtn").addEventListener("click", async()=>{
   try{
     const p=`你是資深物理治療師兼溝通教練。以下是一位治療師正在與病人的對話，病人背景：${S.c.name}，${S.c.dx}，${S.c.chief}。這位病人最適合的方向是：${S.c.fit}。
 ${priceText()}
-對話流程參考：關心開場、探詢痛點、找出目標、衛教連結、提出選項、處理顧慮並邀約。
-
+${sceneCoach()}
 對話：
 ${transcript()}
 
@@ -1310,6 +1414,7 @@ ${(()=>{ const c=findCond(S.c.dx); return c?`實證參考（評 options 與 ethi
 ${priceText()}
 對話結束時病人信任度：${S.trust}/100，病人決定：${S.decision||"尚未決定"}
 
+${sceneCoach()}
 倫理扣分項：保證療效、製造恐懼、貶低健保或其他醫療人員、推薦不符合適應症的自費項目、沒說清楚費用或次數、只給單一自費選項、施壓逼當下決定、震波前沒問禁忌（懷孕、抗凝血、腫瘤等）。
 
 完整對話：
@@ -1325,7 +1430,7 @@ rapport 關係建立、discovery 需求探詢、education 衛教說明、options
     renderReport(r);
     const dimsArr=Object.entries(r.dims||{});
     const weakest=dimsArr.sort((a,b)=>(a[1].score||0)-(b[1].score||0))[0];
-    HIST.push({d:new Date().toISOString(), who:S.c.name, total:r.total, dec:S.decision||"未決定", weak:weakest?DIMNAME[weakest[0]]:""});
+    HIST.push({d:new Date().toISOString(), who:S.c.name+(S.scene==="phone"?"（電話回訪）":S.scene==="line"?"（LINE 回訪）":"")+(S.comp?`（${S.comp}陪同）`:""), total:r.total, dec:S.decision||"未決定", weak:weakest?DIMNAME[weakest[0]]:""});
     saveHist();
   }catch(e){
     $("#reportScreen").hidden=true; $("#sessionScreen").hidden=false;
@@ -1348,7 +1453,7 @@ function renderReport(r){
   const dims=r.dims||{};
   const list=a=>(Array.isArray(a)&&a.length)?`<ul>${a.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:`<p class="muted">無</p>`;
   $("#reportScreen").innerHTML=`<div class="report">
-    <h2>${esc(S.c.name)}的演練講評</h2>
+    <h2>${esc(S.c.name)}的${S.scene==="phone"?"電話回訪":S.scene==="line"?"LINE 回訪":"演練"}講評${S.comp?`<span class="scene-chip">${esc(S.comp)}陪同</span>`:""}</h2>
     <p class="muted">病人最後：${esc(DECNAME[S.decision||"none"])}，信任度 ${S.trust}</p>
     <div class="score-big"><strong>${esc(r.total??"–")}</strong><span>/ 100</span></div>
     <p style="font-family:var(--hand);font-size:18px">${esc(r.summary||"")}</p>
@@ -2547,7 +2652,7 @@ function voiceMsg(log, text, who){
     d.appendChild(b);
   }
   log.appendChild(d); log.scrollTop=log.scrollHeight;
-  speakText(text,who);
+  if(!(S&&S.scene==="line"&&log.id==="log")) speakText(text,who);
   return d;
 }
 function syncToggles(){
@@ -2634,7 +2739,10 @@ function demoPrompt(mode){
   const who=src?`以這位病人為基礎：${src.name}，${src.gender||""}，${src.age} 歲，${src.job}，診斷 ${src.dx}，病程 ${src.dur}，主訴 ${src.chief}，已做過 ${src.tried}。`
     :`病人條件（未指定的由你合理決定，年齡、職業、部位、病程與診斷要合理搭配）：\n${comp}`;
   const ph=DEMO_PHASES[mode];
-  const focus=mode==="c"?`練習重點：${$("#cFocus").value||"依病情判斷是否適合自費"}。`:"";
+  const sc=mode==="c"?$("#cScene").value:"clinic", cp=mode==="c"?$("#cComp").value:"";
+  const focus=mode==="c"?`練習重點：${$("#cFocus").value||"依病情判斷是否適合自費"}。`
+    +(sc==="phone"?"情境改成：病人已經好幾週沒回診，治療師打電話回訪關心；步驟改為表明身分、關心近況、了解沒回診的原因、回應顧慮、提供選擇、約定下一步，phase 仍依序對應六個階段。":sc==="line"?"情境改成：病人已經好幾週沒回診，治療師用診所 LINE 官方帳號傳訊息回訪；訊息要簡短、不寫隱私細節，phase 仍依序對應六個階段。":"")
+    +(cp&&cp!=="random"?`病人的${cp}陪同在旁，會插話；resp 中標明是病人還是${cp}說的話，示範如何同時照顧病人與家屬。`:cp==="random"?"病人有一位家屬陪同在旁，會插話；resp 中標明是誰說的話，示範如何同時照顧病人與家屬。":""):"";
   const goal=mode==="c"
     ?`示範一位資深物理治療師如何在一次門診中，依「${ph.join("→")}」六個步驟，和病人好好溝通，讓病人聽懂自己的問題、選到適合的方案（含是否適合自費）。不誇大療效、不製造恐懼、一定給選擇；病人不適合自費時要誠實說。`
     :`示範一位資深物理治療師如何從初診一路照顧到結案，依「${ph.join("→")}」的順序完成臨床推理：問診要問出關鍵病史，紅旗篩檢不可省略，理學檢查要寫出測試名稱與結果，診斷要說明鑑別理由，治療要依實證並寫出運動劑量（組數、次數、頻率），回診要依疼痛與功能進步調整。`;
